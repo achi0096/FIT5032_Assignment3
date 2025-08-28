@@ -1,12 +1,21 @@
 @import './base.css';
 
+/* 1) Base reset: no default margins, no global centering */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /* remove Vite template constraints */
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   font-weight: normal;
 }
 
+/* 2) Links (keep your original style) */
 a,
 .green {
   text-decoration: none;
@@ -21,15 +30,18 @@ a,
   }
 }
 
+/* 3) IMPORTANT: cancel Vite's centering on wide screens */
 @media (min-width: 1024px) {
   body {
-    display: flex;
-    place-items: center;
+    display: block !important;       /* was: display:flex */
+    place-items: initial !important; /* was: center */
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    display: block !important;       /* ensure not grid/flex */
+    padding: 0 !important;           /* no extra padding */
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
   }
 }

@@ -1,47 +1,54 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+  <div class="container-fluid">
+    <!-- Brand: logo + small subtitle -->
+    <router-link to="/" class="navbar-brand d-flex align-items-center gap-2">
+      <img src="/logo.jpeg" alt="Youth Wellbeing logo" width="64" height="64" class="rounded-circle" />
+      <div class="d-flex flex-column lh-1">
+        <small class="text-muted text-decoration-underline">
+          Youth Mental Health and Wellbeing
+        </small>
+      </div>
+    </router-link>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navMain"
+      aria-controls="navMain"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><router-link to="/" class="nav-link" exact-active-class="active">Home</router-link></li>
+        <li class="nav-item"><router-link to="/resources" class="nav-link" exact-active-class="active">Resources</router-link></li>
+        <li class="nav-item"><router-link to="/feedback" class="nav-link" exact-active-class="active">Feedback</router-link></li>
+      </ul>
     </div>
-  </header>
+  </div>
+</nav>
 
-  <main>
-    <TheWelcome />
-  </main>
+<!-- Keep page content BELOW the navbar -->
+<main class="py-4">
+  <div class="container">
+    <router-view />
+  </div>
+</main>
+
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script>
+export default { name: 'App' }
+</script>
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+<style>
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>
