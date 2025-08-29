@@ -255,17 +255,12 @@ export default {
     },
     writeUsers(arr) { localStorage.setItem('ymhw_users', JSON.stringify(arr)) },
 
-    // live top message on Sign In while typing
-    onSignInInput() {
-      if (this.tab !== 'signin') return
-      const hasEmail = !!this.normalizeEmail(this.email)
-      const hasPw = !!this.password
-      if (!hasEmail && !hasPw) this.error = ''
-      else if (!hasEmail) this.error = 'Username must be entered'
-      else if (!hasPw) this.error = 'Password must be entered'
-      else this.error = ''
+    
+   onSignInInput() {
+      if (this.tab !== 'signin') return;
+      this.error = '';
     },
-    // keep top message in sync on Sign Up for blank fields
+    
     onSignUpInput() {
       if (this.tab !== 'signup') return
       if (!this.error) return
