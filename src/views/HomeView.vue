@@ -29,8 +29,9 @@
           <!-- Full name (Sign Up only) -->
           <div v-if="tab === 'signup'" class="col-12">
             <label for="name" class="form-label">Full name</label>
-            <input id="name" v-model.trim="name" type="text" class="form-control" autocomplete="name"
-              @blur="validateName()" @input="touched.name = true; validateName(); onSignUpInput()" />
+            <input id="name" v-model.trim="name" type="text" class="form-control" autocomplete="name" maxlength="80"
+              @blur="validateName()" @input="touched.name = true; validateName(); onSignUpInput()" 
+            />
             <div v-if="(signupSubmitted || touched.name) && errors.name" class="text-danger small">
               {{ errors.name }}
             </div>
@@ -39,8 +40,9 @@
           <!-- Email -->
           <div class="col-12">
             <label for="email" class="form-label">Email</label>
-            <input id="email" v-model.trim="email" type="email" class="form-control" @blur="validateEmail()"
-              @input="touched.email = true; validateEmail(); onSignUpInput(); onSignInInput()" />
+            <input id="email" v-model.trim="email" type="email" class="form-control" maxlength="80" 
+              @blur="validateEmail()" @input="touched.email = true; validateEmail(); onSignUpInput(); onSignInInput()" 
+            />
             <!-- show email error ONLY on Sign Up -->
             <div v-if="tab === 'signup' && (signupSubmitted || touched.email) && errors.email"
               class="text-danger small">
@@ -55,8 +57,10 @@
             <div class="pw-wrap">
               <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
                 class="form-control with-eye" :autocomplete="tab === 'signin' ? 'current-password' : 'new-password'"
+                maxlength="80"
                 @blur="validatePassword()"
-                @input="touched.password = true; validatePassword(); onSignUpInput(); onSignInInput()" />
+                @input="touched.password = true; validatePassword(); onSignUpInput(); onSignInInput()" 
+              />
               <!-- Eye icon toggle -->
               <span class="eye-toggle" @mousedown.prevent @click="showPassword = !showPassword"
                 :title="showPassword ? 'Hide password' : 'Show password'" role="button" tabindex="0">
@@ -96,8 +100,9 @@
 
             <div class="pw-wrap">
               <input id="cpw" v-model="confirmPassword" :type="showConfirm ? 'text' : 'password'"
-                class="form-control with-eye" @blur="validateConfirm()"
-                @input="touched.confirm = true; validateConfirm(); onSignUpInput()" />
+                class="form-control with-eye" maxlength="80" 
+                @blur="validateConfirm()" @input="touched.confirm = true; validateConfirm(); onSignUpInput()"
+              />
               <!-- Eye icon toggle -->
               <span class="eye-toggle" @mousedown.prevent @click="showConfirm = !showConfirm"
                 :title="showConfirm ? 'Hide password' : 'Show password'" role="button" tabindex="0">
