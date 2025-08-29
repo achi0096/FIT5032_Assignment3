@@ -1,19 +1,23 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-
-// Correct import paths
 import HomeView from '../views/HomeView.vue'
-// import ResourcesView from '../views/ResourcesView.vue'
-// import FeedbackView from '../views/FeedbackView.vue'
+import ResourcesView from '../views/ResourcesView.vue'
 
 const routes = [
-  { path: '/', name: 'Home', component: HomeView }
-  // { path: '/resources', name: 'Resources', component: ResourcesView },
-  // { path: '/feedback', name: 'Feedback', component: FeedbackView }
+  { path: '/', name: 'Home', component: HomeView },
+  { path: '/resources', name: 'Resources', component: ResourcesView, meta: { needLogin: true } }
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory(), // URL like http://localhost:5173/#/
   routes
+})
+
+// very simple guard using localStorage flag 
+router.beforeEach((to) => {
+  const loggedIn = localStorage.getItem('ymhw_logged_in') === 'yes'
+  if (to.meta && to.meta.needLogin && !loggedIn) {
+    return { path: '/' }
+  }
 })
 
 export default router

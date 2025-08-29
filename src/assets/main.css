@@ -1,13 +1,13 @@
 @import './base.css';
 
-/* 1) Base reset: no default margins, no global centering */
+
 html, body {
   height: 100%;
   margin: 0;
 }
 
 #app {
-  /* remove Vite template constraints */
+
   max-width: none;
   width: 100%;
   margin: 0;
@@ -15,13 +15,25 @@ html, body {
   font-weight: normal;
 }
 
-/* 2) Links (keep your original style) */
-a,
-.green {
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear 
+{ 
+  display:none; 
+  width:0; 
+  height:0; 
+}
+
+a {
+  color: var(--bs-link-color);              
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
+  transition: 0.2s;
   padding: 3px;
+}
+
+a:hover {
+  color: var(--bs-link-hover-color);         
+  background: transparent;                  
+  text-decoration: underline;
 }
 
 @media (hover: hover) {
@@ -30,16 +42,16 @@ a,
   }
 }
 
-/* 3) IMPORTANT: cancel Vite's centering on wide screens */
+
 @media (min-width: 1024px) {
   body {
-    display: block !important;       /* was: display:flex */
-    place-items: initial !important; /* was: center */
+    display: block !important;       
+    place-items: initial !important; 
   }
 
   #app {
-    display: block !important;       /* ensure not grid/flex */
-    padding: 0 !important;           /* no extra padding */
+    display: block !important;       
+    padding: 0 !important;        
     max-width: none !important;
     width: 100% !important;
     margin: 0 !important;

@@ -1,35 +1,21 @@
-# Task_A1
+# Youth Mental Health & Wellbeing – FIT5032 A1.2
 
-This template should help get you started developing with Vue 3 in Vite.
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
+## How to run
+npm install 
 npm run dev
-```
 
-### Compile and Minify for Production
 
-```sh
-npm run build
-```
+## Where each requirement is met
+- Vue 3 + Router: src/main.js, src/router/index.js
+- Responsive: Bootstrap 5, screenshots at 360px / 768px / 1200px / 1440px
+- Validations (≥2): HomeView (required + email format + password strength)
+- Dynamic data: src/data/resources.js + ResourcesView.vue (search + render)
+- Authentication: src/composables/useAuth.js + HomeView.vue
+- Role-based auth (member/counsellor): router meta+guard; AdminView.vue; conditional nav
+- Aggregated rating: src/composables/useRatings.js + components/RatingStars.vue
+- Security: sanitize.js, avoid v-html, CSP meta, no eval, length limits
 
-### Lint with [ESLint](https://eslint.org/)
 
-```sh
-npm run lint
-```
+## Notes
+- LocalStorage used for demo only. No real backend.
