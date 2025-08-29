@@ -126,8 +126,8 @@
           <div v-if="tab === 'signup'" class="col-12">
             <label for="role" class="form-label">Role</label>
             <select id="role" v-model="role" class="form-select">
-              <option value="member">Member</option>
-              <option value="counsellor">Counsellor</option>
+              <option value="youth">Youth</option>
+              <option value="teacher">Teacher</option>
             </select>
           </div>
 
