@@ -300,19 +300,20 @@ export default {
         return
       }
 
-      // Sign Up path
-      // --- Sign Up path (replace your current sign-up branch with this) ---
-      this.validateName(true); this.validateEmail(true); this.validatePassword(true); this.validateConfirm(true)
+      // Sign Up path     
+      this.validateName(true); 
+      this.validateEmail(true); 
+      this.validatePassword(true); 
+      this.validateConfirm(true)
 
-      // form-level required checks first (one message at a time, like Sign In)
+      // form-level required checks first (one message at a time)
       const missing = this.firstMissingSignUp()
       if (missing) { this.error = missing; return }
 
       // now format/match checks
       if (!this.email.includes('@')) { this.error = 'Please enter a valid email'; return }
       if (this.password !== this.confirmPassword) { this.error = 'Passwords do not match'; return }
-
-      // optional simple strength check (kept from your Week 4 rules)
+      
       const strong = this.password.length >= 8 && /[A-Za-z]/.test(this.password) && /\d/.test(this.password)
       if (!strong) { this.error = 'Password needs 8+ chars with letters and numbers'; return }
 
