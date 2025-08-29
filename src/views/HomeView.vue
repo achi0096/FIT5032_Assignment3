@@ -305,6 +305,7 @@ export default {
         localStorage.setItem('ymhw_logged_in', 'yes')
         localStorage.setItem('ymhw_current_user', JSON.stringify({ email: found.email, name: found.name, role: found.role }))
         this.info = 'Signed in successfully.'
+        window.dispatchEvent(new Event('auth-changed'))
         this.$router.push('/resources')
         return
       }
