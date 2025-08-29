@@ -1,21 +1,12 @@
-# Youth Mental Health & Wellbeing – FIT5032 A1.2
+# Youth Mental Health & Wellbeing — A1.2
 
+## What this app shows (A1.2)
+- **BR-A (Vue 3 + Responsive):** Vue 3 project with Bootstrap classes for layout.
+- **BR-B.1 (Validations):** Required fields, email format, password rules, confirm password.
+- **BR-B.2 (Dynamic Data):** Resources page renders items from plain JS arrays; simple search/filter; a small checklist saved to localStorage.
 
 ## How to run
-npm install 
+```bash
+npm install
 npm run dev
-
-
-## Where each requirement is met
-- Vue 3 + Router: src/main.js, src/router/index.js
-- Responsive: Bootstrap 5, screenshots at 360px / 768px / 1200px / 1440px
-- Validations (≥2): HomeView (required + email format + password strength)
-- Dynamic data: src/data/resources.js + ResourcesView.vue (search + render)
-- Authentication: src/composables/useAuth.js + HomeView.vue
-- Role-based auth (member/counsellor): router meta+guard; AdminView.vue; conditional nav
-- Aggregated rating: src/composables/useRatings.js + components/RatingStars.vue
-- Security: sanitize.js, avoid v-html, CSP meta, no eval, length limits
-
-
-## Notes
-- LocalStorage used for demo only. No real backend.
+# open the URL shown (e.g., http://localhost:5173)

@@ -1,6 +1,6 @@
 <template>
-  <section>
-    <!-- Greeting (optional) -->
+  <section class="px-3 px-sm-0">
+    <!-- Greeting -->
     <p class="text-muted mb-1" v-if="currentUserName">
       Welcome, <strong>{{ currentUserName }}</strong>
     </p>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Guides / Articles -->
+    <!-- Guides / Articles --->
     <div v-for="item in filteredList" :key="item.id" class="card mb-3">
       <div class="card-body">
         <div class="d-flex justify-content-between">
@@ -47,7 +47,7 @@
         <p class="mb-2">{{ item.summary }}</p>
         <div class="d-flex small text-muted">
           <span class="me-3">Read time: {{ item.minutes }} mins</span>
-          <span>Avg rating: —</span> 
+          <span>Avg rating: —</span>
         </div>
       </div>
     </div>
@@ -65,8 +65,14 @@
           <div>
             <div class="fw-semibold">{{ h.name }}</div>
             <div class="small text-muted">{{ h.hours }}</div>
-          </div>
-          <a :href="'tel:' + h.phone" class="btn btn-sm btn-success">{{ h.phone }}</a>
+          </div>          
+          <a
+            :href="'tel:' + h.phone"
+            class="btn btn-sm btn-success phone-btn"
+            :aria-label="`Call ${h.name} at ${h.phone}`"
+          >
+            {{ h.phone }}
+          </a>
         </li>
       </ul>
     </div>
@@ -89,8 +95,8 @@
             />
             <label class="form-check-label" :for="'c' + i">{{ c.text }}</label>
           </li>
-        </ul>
-        <div class="small text-muted mb-2">
+        </ul>        
+        <div class="small text-muted mb-2" aria-live="polite">
           Progress: {{ doneCount }} / {{ checklist.length }}
         </div>
         <button class="btn btn-outline-secondary btn-sm" @click="resetChecklist">Reset</button>
@@ -107,7 +113,6 @@ export default {
       currentUserName: '',
       searchText: '',
       typeFilter: '',
-      // Simple content (dynamic data) 
       resources: [
         { id: 1, title: 'Mindfulness Basics', type: 'Self-help', minutes: 5, summary: 'A short breathing practice to reduce stress and calm your body.' },
         { id: 2, title: 'Sleep Hygiene Tips', type: 'Wellbeing', minutes: 6, summary: 'Evening routines that help you fall asleep faster and wake up rested.' },
@@ -123,7 +128,7 @@ export default {
         { text: 'Message a friend or family member and say hello.', source: 'Social Support' }
       ],
       helplines: [
-        { name: 'Lifeline (24/7)',   phone: '131114',    hours: 'Anytime' },
+        { name: 'Lifeline (24/7)',   phone: '131114',     hours: 'Anytime' },
         { name: 'Kids Helpline',     phone: '1800551800', hours: '24/7 • 5–25 yrs' },
         { name: 'Beyond Blue',       phone: '1300224636', hours: '24/7' }
       ],
@@ -135,7 +140,7 @@ export default {
       ]
     }
   },
-  computed: {    
+  computed: {
     featuredTip() {
       const i = new Date().getDate() % this.tips.length
       return this.tips[i]
@@ -156,6 +161,7 @@ export default {
     }
   },
   created() {
+    // greet current user
     try {
       const u = JSON.parse(localStorage.getItem('ymhw_current_user') || '{}')
       this.currentUserName = u.name || u.email || ''
@@ -179,3 +185,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.phone-btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+</style>

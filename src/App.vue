@@ -128,7 +128,7 @@ export default {
       localStorage.removeItem('ymhw_logged_in')
       localStorage.removeItem('ymhw_current_user')
       this.checkLogin()
-      window.dispatchEvent(new Event('auth-changed'))   // update header immediately
+      window.dispatchEvent(new Event('auth-changed'))   
       this.$router.push('/')
     }
   }
@@ -136,7 +136,7 @@ export default {
 </script>
 
 <style scoped>
-/* Small pill with initial + name */
+/* Small pill with initial + name at top right corner*/
 .user-chip {
   display: inline-flex;
   align-items: center;
