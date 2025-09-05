@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ResourcesView from '../views/ResourcesView.vue'
-import LoginView from '../views/LoginView.vue'
+import LoginView from '../views/LoginView.vue.vue'
 import StudentView from '../views/StudentView.vue'
 import TeacherView from '../views/TeacherView.vue'
 import AboutView from '../views/AboutView.vue' // ratings page (both roles)
