@@ -4,7 +4,7 @@
     <p class="text-muted mb-1" v-if="currentUserName">
       Welcome, <strong>{{ currentUserName }}</strong>
     </p>
-
+    
     <h2 class="h4">Resources</h2>
 
     <!-- Tip of the Day -->
@@ -45,9 +45,9 @@
           <span class="badge bg-secondary align-self-start">{{ item.type }}</span>
         </div>
         <p class="mb-2">{{ item.summary }}</p>
-        <div class="d-flex small text-muted">
-          <span class="me-3">Read time: {{ item.minutes }} mins</span>
-          <span>Avg rating: —</span>
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <div class="text-muted small">Read time: {{ item.minutes }} mins</div>
+          <RatingWidget :item-id="`resource:${item.id}`" size="xs" />
         </div>
       </div>
     </div>
@@ -106,8 +106,10 @@
 </template>
 
 <script>
+import RatingWidget from '../components/RatingWidget.vue'
 export default {
   name: 'ResourcesView',
+  components: { RatingWidget },
   data() {
     return {
       currentUserName: '',
@@ -134,7 +136,7 @@ export default {
       ],
       checklist: [
         { text: 'Had water and a snack/meal', done: false },
-        { text: 'Moved my body for 2–5 minutes', done: false },
+        { text: 'Moved my body for 2-5 minutes', done: false },
         { text: 'Messaged or spoke to someone I trust', done: false },
         { text: 'Took 5 slow breaths', done: false }
       ]

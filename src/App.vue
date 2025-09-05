@@ -17,7 +17,23 @@
           <button class="btn btn-primary btn-sm" @click="showSupport = true">
             Get Support Now
           </button>
-
+          
+          <!-- Role links -->
+          <router-link
+            v-if="isLoggedIn && role === 'student'"
+            class="btn btn-outline-primary btn-sm"
+            to="/student"
+          >
+            Student
+          </router-link>
+          <router-link
+            v-if="isLoggedIn && role === 'teacher'"
+            class="btn btn-outline-primary btn-sm"
+            to="/teacher"
+          >
+            Teacher
+          </router-link>
+          
           <!-- User chip (only when logged in) -->
           <div v-if="isLoggedIn" class="user-chip">
             <div class="avatar">{{ userInitial }}</div>
@@ -88,6 +104,7 @@ export default {
     return {
       isLoggedIn: false,
       currentUserName: '',
+      role: '',
       showSupport: false,
       supportList: [
         { name: 'Lifeline (24/7)', phone: '131114', hours: '24 hours' },
@@ -115,20 +132,20 @@ export default {
   },
   watch: { $route() { this.checkLogin() } },
   methods: {
+    safeParse(json, fallback) {
+      try { return JSON.parse(json) ?? fallback } catch (err) { return fallback }
+    },
     checkLogin() {
       this.isLoggedIn = localStorage.getItem('ymhw_logged_in') === 'yes'
-      try {
-        const u = JSON.parse(localStorage.getItem('ymhw_current_user') || '{}')        
-        this.currentUserName = (u && (u.name || u.email)) ? (u.name || u.email) : ''
-      } catch (_) {
-        this.currentUserName = ''
-      }
+      const u = this.safeParse(localStorage.getItem('ymhw_current_user'), {})
+      this.currentUserName = (u && (u.name || u.email)) ? (u.name || u.email) : ''
+      this.role = typeof u?.role === 'string' ? u.role : ''     // <- expose role
     },
     logout() {
       localStorage.removeItem('ymhw_logged_in')
       localStorage.removeItem('ymhw_current_user')
       this.checkLogin()
-      window.dispatchEvent(new Event('auth-changed'))   
+      window.dispatchEvent(new Event('auth-changed'))
       this.$router.push('/')
     }
   }

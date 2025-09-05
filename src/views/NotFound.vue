@@ -1,6 +1,7 @@
 <template>
-      <section class="text-center py-5">
-            <h2 class="h4">Page not found</h2>
-            <RouterLink class="btn btn-outline-primary mt-3" to="/">Go Home</RouterLink>
-      </section>
+  <div class="container my-5 text-center">
+    <h2>Page not found</h2>
+    <p class="text-muted">The page you’re looking for doesn’t exist.</p>
+    <router-link to="/" class="btn btn-primary">Go Home</router-link>
+  </div>
 </template>
