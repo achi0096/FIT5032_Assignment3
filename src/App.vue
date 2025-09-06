@@ -26,9 +26,8 @@
             Login
           </router-link>
 
-          <!-- Back button on all other pages except Home/Login -->
-          <BackButton v-if="!showLoginBtn && $route.name !== 'Login' && this.$route.name !== 'Login'" class="me-2"
-            fallback="/resources" /> 
+          <!-- Back button -->
+          <BackButton v-if="showBackBtn" class="me-2" fallback="/resources" />
 
           <!-- User dropdown -->
           <div v-if="isLoggedIn" class="dropdown">
@@ -47,7 +46,7 @@
               <li>
                 <hr class="dropdown-divider" />
               </li>
-              <li><button class="dropdown-item" @click="logout">Sign out</button></li>
+              <li><a href="#" class="dropdown-item" @click.prevent="logout">Sign out</a></li>
             </ul>
           </div>
         </div>
@@ -64,9 +63,9 @@
     <!-- Footer -->
     <footer class="border-top mt-4">
       <div class="container text-center py-3 small">
-        <router-link to="/crisis" class="me-3">Crisis Help</router-link> |
-        <router-link to="/accessibility" class="mx-3">Accessibility</router-link> |
-        <router-link to="/privacy" class="ms-3">Privacy Policy</router-link>
+        <button class="btn btn-link p-0 me-3" @click="showCrisis = true">Crisis Help</button> |
+        <button class="btn btn-link p-0 mx-3" @click="showAccessibility = true">Accessibility</button> |
+        <button class="btn btn-link p-0 ms-3" @click="showPrivacy = true">Privacy Policy</button>
       </div>
     </footer>
 
@@ -100,6 +99,98 @@
       </div>
     </div>
     <div v-if="showSupport" class="modal-backdrop fade show"></div>
+    
+    <!-- Crisis Modal -->
+    <div v-if="showCrisis" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Crisis Help</h5>
+            <button type="button" class="btn-close" @click="showCrisis = false" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              If you or someone else is in immediate danger, call <strong>000</strong>.
+            </p>
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">Lifeline (24/7)</div>
+                  <div class="small text-muted">24 hours</div>
+                </div>
+                <a href="tel:131114" class="btn btn-sm btn-success">13 11 14</a>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">Beyond Blue</div>
+                  <div class="small text-muted">24 hours</div>
+                </div>
+                <a href="tel:1300224636" class="btn btn-sm btn-success">1300 224 636</a>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">Kids Helpline</div>
+                  <div class="small text-muted">24 hours</div>
+                </div>
+                <a href="tel:1800551800" class="btn btn-sm btn-success">1800 55 1800</a>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="showCrisis = false">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showCrisis" class="modal-backdrop fade show"></div>
+
+    <!-- Accessibility Modal -->
+    <div v-if="showAccessibility" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Accessibility</h5>
+            <button type="button" class="btn-close" @click="showAccessibility = false" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="small">
+              <li>Keyboard accessible navigation and forms</li>
+              <li>High-contrast text and sufficient color contrast</li>
+              <li>Descriptive labels and ARIA attributes where needed</li>
+              <li>Responsive layout for mobile and desktop</li>
+            </ul>
+            <p class="small text-muted mb-0">If you need adjustments, let us know.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="showAccessibility = false">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showAccessibility" class="modal-backdrop fade show"></div>
+
+    <!-- Privacy Modal -->
+    <div v-if="showPrivacy" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Privacy Policy</h5>
+            <button type="button" class="btn-close" @click="showPrivacy = false" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small">
+              We store your account details locally in your browser (LocalStorage) for demo purposes.
+              No data is sent to a server. You can remove your data by signing out and clearing your browser storage.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="showPrivacy = false">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showPrivacy" class="modal-backdrop fade show"></div>
+
   </div>
 </template>
 
@@ -115,6 +206,9 @@ export default {
       currentUserName: '',
       role: '',
       showSupport: false,
+      showCrisis: false,        
+      showAccessibility: false, 
+      showPrivacy: false,
       supportList: [
         { name: 'Lifeline (24/7)', phone: '131114', hours: '24 hours' },
         { name: 'Kids Helpline', phone: '1800551800', hours: '24 hours' },
@@ -123,12 +217,11 @@ export default {
     }
   },
   computed: {
-    // Show the Login button on info pages 
-    showLoginBtn() {
+    showBackBtn() {
       const name = this.$route?.name || ''
-      const special = new Set(['Crisis Help', 'Accessibility', 'Privacy Policy'])
-      return special.has(name)
+      return name === 'Student' || name === 'Teacher'
     },
+    
     userInitial() {
       const n = (this.currentUserName || '').trim()
       return n ? n.charAt(0).toUpperCase() : 'U'
@@ -181,15 +274,15 @@ export default {
   text-overflow: ellipsis;
 }
 
-.dropdown-menu {
-  min-width: auto !important;
-  width: 100% !important;
-  padding: 0.25rem 0;
-  font-size: 0.85rem;
-  text-align: left;
-}
-
 .dropdown-menu .dropdown-item {
+  font-size: 0.875rem;   
+  text-decoration: none; 
   padding: 0.25rem 0.75rem;
 }
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  text-decoration: underline;
+}
+
 </style>

@@ -3,52 +3,43 @@ import ResourcesView from '../views/ResourcesView.vue'
 import LoginView from '@/views/LoginView.vue'
 import StudentView from '../views/StudentView.vue'
 import TeacherView from '../views/TeacherView.vue'
-import AboutView from '../views/AboutView.vue' 
-import CrisisView from '@/views/CrisisView.vue'
-import AccessibilityView from '@/views/AccessibilityView.vue'
-import PrivacyView from '@/views/PrivacyView.vue'
+import ResetPassword from '@/views/ResetPassword.vue'
 
 const routes = [
   { path: '/resources', name: 'Resources', component: ResourcesView },
-  { path: '/crisis', name: 'Crisis Help', component: CrisisView },
-  { path: '/accessibility', name: 'Accessibility', component: AccessibilityView },
-  { path: '/privacy', name: 'Privacy Policy', component: PrivacyView },
-  // pages for any logged-in user (student OR teacher)
-  {
-    path: '/about',
-    name: 'About',
-    component: AboutView,
-    meta: { requiresAuth: true, roles: ['student', 'teacher'] },
-  },
-
+  { path: '/reset-password', name: 'ResetPassword', component: ResetPassword },
+  
   // teacher-only page
   {
-    path: '/teacher',
-    name: 'Teacher',
-    component: TeacherView,
+    path: '/teacher', name: 'Teacher', component: TeacherView,
     meta: { requiresAuth: true, roles: ['teacher'] },
   },
 
-  // student-only page 
+  // student-only page
   {
-    path: '/student',
-    name: 'Student',
-    component: StudentView,
+    path: '/student', name: 'Student', component: StudentView,
     meta: { requiresAuth: true, roles: ['student'] },
   },
 
-   { path: '/login', name: 'Login', component: LoginView },
-   { path: '/', redirect: { name: 'Login' } },
+  { path: '/login', name: 'Login', component: LoginView },
+  { path: '/', redirect: { name: 'Login' } },
 ]
 
-const router = createRouter({ history: createWebHistory(), routes })
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    // always scroll to the top
+    return { left: 0, top: 0 }
+  },
+})
 
-function getSession () {
+function getSession() {
   try {
     const loggedIn = localStorage.getItem('ymhw_logged_in') === 'yes'
     const u = JSON.parse(localStorage.getItem('ymhw_current_user') || '{}')
     const role = typeof u?.role === 'string' ? u.role : null
-    const username = (u && (u.name || u.email)) ? (u.name || u.email) : null
+    const username = u && (u.name || u.email) ? u.name || u.email : null
     return { loggedIn, role, username }
   } catch (err) {
     return { loggedIn: false, role: null, username: null }
@@ -57,9 +48,14 @@ function getSession () {
 
 router.beforeEach((to, from, next) => {
   const { loggedIn, role } = getSession()
-  if (to.meta?.requiresAuth && !loggedIn)
-    return next({ name: 'Login', query: { redirect: to.fullPath } })
-  if (to.meta?.roles && !to.meta.roles.includes(role)) return next({ name: 'Home' })
+
+  if (loggedIn && to.name === 'Login') return next('/resources')
+  
+  if (to.name === 'Student' && role !== 'student') return next('/resources')
+  if (to.name === 'Teacher' && role !== 'teacher') return next('/resources')
+  
+  if (to.name === 'Resources' && !loggedIn) return next({ name: 'Login' })
+
   next()
 })
 

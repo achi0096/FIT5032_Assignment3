@@ -23,8 +23,7 @@
       <div class="card-body">
         <p v-if="info" class="text-success small mb-2" role="status">{{ info }}</p>
         <p v-if="error" class="text-danger small mb-2" role="alert">{{ error }}</p>
-
-        <!-- Our own validation (no native tooltip) -->
+      
         <form @submit.prevent="submitForm" class="row g-3" novalidate>
           <!-- Full name (Sign Up only) -->
           <div v-if="tab === 'signup'" class="col-12">
@@ -171,7 +170,7 @@ export default {
       email: '',
       password: '',
       confirmPassword: '',
-      role: 'member',
+      role: 'student',
       error: '',
       info: '',
       showPassword: false,
