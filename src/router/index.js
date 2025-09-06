@@ -1,14 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import ResourcesView from '../views/ResourcesView.vue'
-import LoginView from '../views/LoginView.vue.vue'
+import LoginView from '@/views/LoginView.vue'
 import StudentView from '../views/StudentView.vue'
 import TeacherView from '../views/TeacherView.vue'
-import AboutView from '../views/AboutView.vue' // ratings page (both roles)
+import AboutView from '../views/AboutView.vue' 
+import CrisisView from '@/views/CrisisView.vue'
+import AccessibilityView from '@/views/AccessibilityView.vue'
+import PrivacyView from '@/views/PrivacyView.vue'
 
 const routes = [
-  { path: '/', name: 'Home', component: HomeView },
-   { path: '/resources', name: 'Resources', component: ResourcesView },
+  { path: '/resources', name: 'Resources', component: ResourcesView },
+  { path: '/crisis', name: 'Crisis Help', component: CrisisView },
+  { path: '/accessibility', name: 'Accessibility', component: AccessibilityView },
+  { path: '/privacy', name: 'Privacy Policy', component: PrivacyView },
   // pages for any logged-in user (student OR teacher)
   {
     path: '/about',
@@ -33,7 +37,8 @@ const routes = [
     meta: { requiresAuth: true, roles: ['student'] },
   },
 
-  { path: '/login', name: 'Login', component: LoginView },
+   { path: '/login', name: 'Login', component: LoginView },
+   { path: '/', redirect: { name: 'Login' } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })

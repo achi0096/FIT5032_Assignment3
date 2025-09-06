@@ -163,7 +163,7 @@
 
 <script>
 export default {
-  name: 'HomeView',
+  name: 'LoginView',
   data() {
     return {
       tab: 'signin',
