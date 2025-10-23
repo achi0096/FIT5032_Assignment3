@@ -6,7 +6,7 @@
 
         <!-- Left: Brand -->
         <div class="d-flex align-items-center gap-2">
-          <router-link to="/" class="navbar-brand d-flex align-items-center gap-2">
+          <router-link to="/resources" class="navbar-brand d-flex align-items-center gap-2">
             <img src="/logo.jpeg" alt="logo" width="48" height="48" class="rounded-circle" />
             <span class="fst-italic text-decoration-underline">
               Youth Mental Health and Wellbeing
@@ -21,7 +21,7 @@
             Get Support Now
           </button>
 
-          <!-- Login on info pages only -->
+          <!-- Login (only when logged out) -->
           <router-link v-if="showLoginBtn" :to="{ name: 'Login' }" class="btn btn-outline-secondary btn-sm">
             Login
           </router-link>
@@ -29,12 +29,13 @@
           <!-- Back button -->
           <BackButton v-if="showBackBtn" class="me-2" fallback="/resources" />
 
-          <!-- User dropdown -->
-          <div v-if="isLoggedIn" class="dropdown">
+          <!-- User dropdown (when logged in) -->
+          <div v-if="isLoggedIn && $route.name !== 'Login'" class="dropdown">
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1"
               type="button" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="avatar">{{ userInitial }}</div>
               <span class="user-name">{{ currentUserName }}</span>
+              <span v-if="role" class="badge bg-success text-uppercase">{{ role }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li v-if="role === 'student'">
@@ -43,9 +44,7 @@
               <li v-if="role === 'teacher'">
                 <router-link class="dropdown-item" to="/teacher">Teacher Area</router-link>
               </li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
+              <li><hr class="dropdown-divider" /></li>
               <li><a href="#" class="dropdown-item" @click.prevent="logout">Sign out</a></li>
             </ul>
           </div>
@@ -83,7 +82,7 @@
             </p>
             <ul class="list-group">
               <li v-for="(r, i) in supportList" :key="i"
-                class="list-group-item d-flex justify-content-between align-items-start">
+                  class="list-group-item d-flex justify-content-between align-items-start">
                 <div>
                   <div class="fw-bold">{{ r.name }}</div>
                   <div class="small text-muted">{{ r.hours }}</div>
@@ -99,7 +98,7 @@
       </div>
     </div>
     <div v-if="showSupport" class="modal-backdrop fade show"></div>
-    
+
     <!-- Crisis Modal -->
     <div v-if="showCrisis" class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -179,8 +178,7 @@
           </div>
           <div class="modal-body">
             <p class="small">
-              We store your account details locally in your browser (LocalStorage) for demo purposes.
-              No data is sent to a server. You can remove your data by signing out and clearing your browser storage.
+              We now use Firebase Authentication & Firestore for accounts.
             </p>
           </div>
           <div class="modal-footer">
@@ -196,23 +194,30 @@
 
 <script>
 import BackButton from '@/components/BackButton.vue'
+import { auth, db } from '@/firebase/init'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 
 export default {
   name: 'App',
   components: { BackButton },
   data() {
     return {
+      // auth-driven UI
       isLoggedIn: false,
       currentUserName: '',
       role: '',
+
+      // modals
       showSupport: false,
-      showCrisis: false,        
-      showAccessibility: false, 
+      showCrisis: false,
+      showAccessibility: false,
       showPrivacy: false,
+
       supportList: [
         { name: 'Lifeline (24/7)', phone: '131114', hours: '24 hours' },
-        { name: 'Kids Helpline', phone: '1800551800', hours: '24 hours' },
-        { name: 'Beyond Blue', phone: '1300224636', hours: '24 hours' }
+        { name: 'Kids Helpline',  phone: '1800551800', hours: '24 hours' },
+        { name: 'Beyond Blue',    phone: '1300224636', hours: '24 hours' }
       ]
     }
   },
@@ -221,36 +226,52 @@ export default {
       const name = this.$route?.name || ''
       return name === 'Student' || name === 'Teacher'
     },
-    
+    // show Login button only when not authenticated
+    showLoginBtn() {
+      const routeName = this.$route?.name || "";
+      return !this.isLoggedIn && routeName !== "Login";
+    },
+
     userInitial() {
       const n = (this.currentUserName || '').trim()
       return n ? n.charAt(0).toUpperCase() : 'U'
     }
   },
-  created() { this.checkLogin() },
-  mounted() {
-    window.addEventListener('auth-changed', this.checkLogin)
-    window.addEventListener('storage', this.checkLogin)
+  created() {
+    // Listen once for Firebase auth state; update top-right user/role
+    onAuthStateChanged(auth, async (u) => {
+      if (!u) {
+        this.isLoggedIn = false
+        this.currentUserName = ''
+        this.role = ''
+        return
+      }
+
+      // base: name (or email) from Auth
+      const display = u.displayName || u.email || 'User'
+      let role = 'student' // default
+
+      // try to read role from Firestore users/{uid}
+      try {
+        const snap = await getDoc(doc(db, 'users', u.uid))
+        if (snap.exists() && snap.data()?.role) role = snap.data().role
+      } catch (e) {
+        console.warn('Could not fetch role:', e?.message || e)
+      }
+
+      this.isLoggedIn = true
+      this.currentUserName = display
+      this.role = role
+    })
   },
-  beforeUnmount() {
-    window.removeEventListener('auth-changed', this.checkLogin)
-    window.removeEventListener('storage', this.checkLogin)
-  },
-  watch: { $route() { this.checkLogin() } },
   methods: {
-    safeParse(json, fallback) { try { return JSON.parse(json) ?? fallback } catch { return fallback } },
-    checkLogin() {
-      this.isLoggedIn = localStorage.getItem('ymhw_logged_in') === 'yes'
-      const u = this.safeParse(localStorage.getItem('ymhw_current_user'), {})
-      this.currentUserName = (u && (u.name || u.email)) ? (u.name || u.email) : ''
-      this.role = typeof u?.role === 'string' ? u.role : ''
-    },
-    logout() {
-      localStorage.removeItem('ymhw_logged_in')
-      localStorage.removeItem('ymhw_current_user')
-      this.checkLogin()
-      window.dispatchEvent(new Event('auth-changed'))
-      this.$router.push('/')
+    async logout() {
+      try { await signOut(auth) } finally {
+        this.isLoggedIn = false
+        this.currentUserName = ''
+        this.role = ''
+        this.$router.push('/login')
+      }
     }
   }
 }
@@ -275,8 +296,8 @@ export default {
 }
 
 .dropdown-menu .dropdown-item {
-  font-size: 0.875rem;   
-  text-decoration: none; 
+  font-size: 0.875rem;
+  text-decoration: none;
   padding: 0.25rem 0.75rem;
 }
 
@@ -284,5 +305,4 @@ export default {
 .dropdown-menu .dropdown-item:focus {
   text-decoration: underline;
 }
-
 </style>

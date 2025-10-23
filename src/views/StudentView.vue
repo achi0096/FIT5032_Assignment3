@@ -1,9 +1,15 @@
 <template>
   <div class="container my-4">
     <h2 class="mb-2">Student Area</h2>
-    <p class="text-muted">Hi, {{ displayName }}. This page is only for students.</p>
 
-    <div class="card">
+    <p v-if="displayName" class="text-muted">
+      Hi, {{ displayName }}. This page is only for students.
+    </p>
+    <p v-else class="text-muted">
+      Loading user info...
+    </p>
+
+    <div class="card mt-3">
       <div class="card-body">
         <h5 class="card-title">Quick links</h5>
         <ul class="mb-0">
@@ -16,16 +22,40 @@
 </template>
 
 <script>
+import { auth, db } from "@/firebase/init";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+
 export default {
-  name: 'StudentView',
+  name: "StudentView",
   data() {
-    return { displayName: 'Student' }
+    return {
+      displayName: "",
+    };
   },
-  created() {
-    try {
-      const u = JSON.parse(localStorage.getItem('ymhw_current_user') || 'null')
-      this.displayName = (u && (u.name || u.email)) ? (u.name || u.email) : 'Student'
-    } catch (_) {}
-  }
-}
+  async created() {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        this.displayName = "Guest";
+        return;
+      }
+
+      // Try to read user's display name from Auth
+      let name = user.displayName || user.email || "Student";
+
+      // Try to read name from Firestore users/{uid} (if stored there)
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          name = data.displayName || data.name || name;
+        }
+      } catch (e) {
+        console.warn("Could not load Firestore user:", e.message);
+      }
+
+      this.displayName = name;
+    });
+  },
+};
 </script>

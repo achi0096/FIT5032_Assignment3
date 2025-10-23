@@ -143,8 +143,7 @@
             <button type="button" class="btn btn-outline-secondary" @click="clearSignUp">Clear</button>
             <button type="submit" class="btn btn-success">Create Account</button>
           </div>
-
-          <!-- Switch link -->
+       
           <div class="col-12 text-center">
             <small class="text-muted">
               {{ tab === 'signin' ? "Don’t have an account?" : "Already have an account?" }}
@@ -161,175 +160,227 @@
 </template>
 
 <script>
+import { auth, db } from "@/firebase/init";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  sendPasswordResetEmail,
+  signOut,
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+
 export default {
-  name: 'LoginView',
+  name: "LoginView",
   data() {
     return {
-      tab: 'signin',
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      role: 'student',
-      error: '',
-      info: '',
+     
+      tab: "signin",
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "student",
+      error: "",
+      info: "",
       showPassword: false,
       showConfirm: false,
       touched: { name: false, email: false, password: false, confirm: false },
       signupSubmitted: false,
       suppressErrors: false,
-      errors: { name: null, email: null, password: null, confirm: null }
-    }
+      errors: { name: null, email: null, password: null, confirm: null },
+    };
   },
+
   methods: {
-    // tab switching helpers
+ 
     prepareTabSwitch() {
-      this.suppressErrors = true
-      this.error = ''; this.info = ''
-      this.errors = { name: null, email: null, password: null, confirm: null }
-      this.touched = { name: false, email: false, password: false, confirm: false }
+      this.suppressErrors = true;
+      this.error = "";
+      this.info = "";
+      this.errors = { name: null, email: null, password: null, confirm: null };
+      this.touched = { name: false, email: false, password: false, confirm: false };
     },
     switchTab(t) {
-      this.tab = t
-      // clear inputs
-      this.name = ''; this.email = ''; this.password = ''; this.confirmPassword = ''
-      this.role = 'member'
-      this.showPassword = false; this.showConfirm = false
-      this.touched = { name: false, email: false, password: false, confirm: false }
-      this.signupSubmitted = false
-      // focus first field
+      this.tab = t;
+      this.name = "";
+      this.email = "";
+      this.password = "";
+      this.confirmPassword = "";
+      this.role = "student";
+      this.showPassword = false;
+      this.showConfirm = false;
+      this.touched = { name: false, email: false, password: false, confirm: false };
+      this.signupSubmitted = false;
       this.$nextTick(() => {
-        const firstId = t === 'signin' ? 'email' : 'name'
-        const el = document.getElementById(firstId)
-        if (el) el.focus()
-        setTimeout(() => { this.suppressErrors = false }, 0)
-      })
+        const firstId = t === "signin" ? "email" : "name";
+        document.getElementById(firstId)?.focus();
+        setTimeout(() => (this.suppressErrors = false), 0);
+      });
     },
-
     clearSignUp() {
-      if (this.tab !== 'signup') return
-      this.name = ''; this.email = ''; this.password = ''; this.confirmPassword = ''
-      this.role = 'member'
-      this.showPassword = false; this.showConfirm = false
-      this.error = ''; this.info = ''
-      this.errors = { name: null, email: null, password: null, confirm: null }
-      this.touched = { name: false, email: false, password: false, confirm: false }
-      this.signupSubmitted = false
-      this.$nextTick(() => document.getElementById('name')?.focus())
+      if (this.tab !== "signup") return;
+      this.name = "";
+      this.email = "";
+      this.password = "";
+      this.confirmPassword = "";
+      this.role = "student";
+      this.showPassword = false;
+      this.showConfirm = false;
+      this.error = "";
+      this.info = "";
+      this.errors = { name: null, email: null, password: null, confirm: null };
+      this.touched = { name: false, email: false, password: false, confirm: false };
+      this.signupSubmitted = false;
+      this.$nextTick(() => document.getElementById("name")?.focus());
     },
 
-    // simple validators (gated by touched/submitted; no flicker)
+    // ---- field validation ----
     validateName() {
-      if (this.suppressErrors || this.tab !== 'signup') return
-      if (!(this.signupSubmitted || this.touched.name)) { this.errors.name = null; return }
-      this.errors.name = (!this.name || this.name.length < 2) ? 'Name must be at least 2 characters' : null
+      if (this.suppressErrors || this.tab !== "signup") return;
+      if (!(this.signupSubmitted || this.touched.name)) { this.errors.name = null; return; }
+      this.errors.name = (!this.name || this.name.length < 2) ? "Name must be at least 2 characters" : null;
     },
     validateEmail() {
-      if (this.suppressErrors) return
-      if (this.tab === 'signup') {
-        if (!(this.signupSubmitted || this.touched.email)) { this.errors.email = null; return }
-        this.errors.email = this.email && this.email.includes('@') ? null : 'Please enter a valid email'
+      if (this.suppressErrors) return;
+      if (this.tab === "signup") {
+        if (!(this.signupSubmitted || this.touched.email)) { this.errors.email = null; return; }
+        this.errors.email = this.email && this.email.includes("@") ? null : "Please enter a valid email";
       } else {
-        this.errors.email = null
+        this.errors.email = null;
       }
     },
     validatePassword() {
-      if (this.suppressErrors) return
-      if (this.tab === 'signup') {
-        if (!(this.signupSubmitted || this.touched.password)) { this.errors.password = null; return }
-        const pw = this.password || ''
-        const strong = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw)
-        this.errors.password = strong ? null : 'Password needs 8+ chars with letters and numbers'
+      if (this.suppressErrors) return;
+      if (this.tab === "signup") {
+        if (!(this.signupSubmitted || this.touched.password)) { this.errors.password = null; return; }
+        const pw = this.password || "";
+        const strong = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
+        this.errors.password = strong ? null : "Password needs 8+ chars with letters and numbers";
       } else {
-        this.errors.password = null
+        this.errors.password = null;
       }
     },
     validateConfirm() {
-      if (this.suppressErrors || this.tab !== 'signup') return
-      if (!(this.signupSubmitted || this.touched.confirm)) { this.errors.confirm = null; return }
-      this.errors.confirm = (this.password === this.confirmPassword) ? null : 'Passwords do not match'
-    },
-
-    // helpers
-    normalizeEmail(str) {
-      return (str || '').trim().toLowerCase()
-    },
-    readUsers() {
-      try { return JSON.parse(localStorage.getItem('ymhw_users') || '[]') } catch (_) { return [] }
-    },
-    writeUsers(arr) { localStorage.setItem('ymhw_users', JSON.stringify(arr)) },
-
-    
-   onSignInInput() {
-      if (this.tab !== 'signin') return;
-      this.error = '';
+      if (this.suppressErrors || this.tab !== "signup") return;
+      if (!(this.signupSubmitted || this.touched.confirm)) { this.errors.confirm = null; return; }
+      this.errors.confirm = (this.password === this.confirmPassword) ? null : "Passwords do not match";
     },
     
-    onSignUpInput() {
-      if (this.tab !== 'signup') return
-      if (!this.error) return
-      const msg = this.firstMissingSignUp()
-      this.error = msg
+    normalizeEmail(str) { return (str || "").trim().toLowerCase(); },
+
+    async doSignInWithFirebase(email, password) {
+      const map = {
+        "auth/invalid-credential": "Invalid email or password",
+        "auth/user-not-found": "No account with this email",
+        "auth/wrong-password": "Wrong password",
+        "auth/invalid-email": "Please enter a valid email",
+        "auth/too-many-requests": "Too many attempts; try again later",
+        "auth/email-already-in-use": "Email is already registered",
+        "auth/invalid-email": "Please enter a valid email",
+        "auth/weak-password": "Password needs 8+ chars with letters and numbers",
+      };
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        this.info = "Signed in successfully.";
+        this.$router.push("/resources"); 
+      } catch (e) {
+        this.error = map[e.code] ?? "Login failed. Please try again.";
+        console.debug("SignIn error:", e.code, e.message);
+      }
     },
-    firstMissingSignUp() {
-      if (!this.name || !this.name.trim()) return 'Full name must be entered'
-      if (!this.email || !this.email.trim()) return 'Email must be entered'
-      if (!this.password) return 'Password must be entered'
-      if (!this.confirmPassword) return 'Confirm password must be entered'
-      return ''
+
+    async doSignUpWithFirebase({ name, email, password, role }) {
+    const map = {
+      "auth/email-already-in-use": "Email is already registered",
+      "auth/invalid-email": "Please enter a valid email",
+      "auth/weak-password": "Password needs 8+ chars with letters and numbers",
+    };
+      try {
+        // Create Firebase user
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+        // Set display name in Auth
+        const cleanName = (name || "").trim();
+        if (cleanName) {
+          await updateProfile(cred.user, { displayName: cleanName });
+        }
+
+        // Save profile in Firestore 
+        await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid,
+          displayName: cleanName,
+          email,               
+          role: role || "student",
+          createdAt: serverTimestamp(),
+        });                  
+
+        // tell user to sign in, switch to Sign In tab, clear pw fields
+        this.info = "Account created. Please sign in.";
+        this.tab = "signin";
+        this.password = "";
+        this.confirmPassword = "";
+        this.$nextTick(() => document.getElementById("email")?.focus());
+      } catch (e) {
+        this.error = map[e.code] ?? (e.message || "Could not create account");
+        console.debug("SignUp error:", e.code, e.message);
+      }
     },
+    
+    async submitForm() {
+      this.error = ""; this.info = "";
 
-    // submit
-    submitForm() {
-      this.error = ''; this.info = ''
-
-      if (this.tab === 'signin') {
-        const emailN = this.normalizeEmail(this.email)
-        const hasEmail = !!emailN
-        const hasPw = !!this.password
-
-        if (!hasEmail && !hasPw) { this.error = 'Username and password must be entered'; return }
-        if (!hasEmail) { this.error = 'Username must be entered'; return }
-        if (!hasPw) { this.error = 'Password must be entered'; return }
-
-        const users = this.readUsers()
-        const found = users.find(u => this.normalizeEmail(u.email) === emailN && u.password === this.password)
-        if (!found) { this.error = 'Invalid username or password'; return }
-
-        localStorage.setItem('ymhw_logged_in', 'yes')
-        localStorage.setItem('ymhw_current_user', JSON.stringify({ email: found.email, name: found.name, role: found.role }))
-        this.info = 'Signed in successfully.'
-        window.dispatchEvent(new Event('auth-changed'))
-        this.$router.push('/resources')
-        return
+      if (this.tab === "signin") {
+        const emailN = this.normalizeEmail(this.email);
+        if (!emailN && !this.password) { this.error = "Username and password must be entered"; return; }
+        if (!emailN) { this.error = "Username must be entered"; return; }
+        if (!this.password) { this.error = "Password must be entered"; return; }
+        await this.doSignInWithFirebase(emailN, this.password);
+        return;
       }
 
       // --- Sign Up path ---
-      this.signupSubmitted = true
-      this.validateName(); this.validateEmail(); this.validatePassword(); this.validateConfirm()
+      this.signupSubmitted = true;
+      this.validateName(); this.validateEmail(); this.validatePassword(); this.validateConfirm();
 
-      const missing = this.firstMissingSignUp()
-      if (missing) { this.error = missing; return }
+      const firstMissing = () => {
+        if (!this.name || !this.name.trim()) return "Full name must be entered";
+        if (!this.email || !this.email.trim()) return "Email must be entered";
+        if (!this.password) return "Password must be entered";
+        if (!this.confirmPassword) return "Confirm password must be entered";
+        return "";
+      };
+      const missing = firstMissing();
+      if (missing) { this.error = missing; return; }
+      if (!this.email.includes("@")) { this.error = "Please enter a valid email"; return; }
+      if (this.password !== this.confirmPassword) { this.error = "Passwords do not match"; return; }
+      const strong = this.password.length >= 8 && /[A-Za-z]/.test(this.password) && /\d/.test(this.password);
+      if (!strong) { this.error = "Password needs 8+ chars with letters and numbers"; return; }
 
-      if (!this.email.includes('@')) { this.error = 'Please enter a valid email'; return }
-      if (this.password !== this.confirmPassword) { this.error = 'Passwords do not match'; return }
-      const strong = this.password.length >= 8 && /[A-Za-z]/.test(this.password) && /\d/.test(this.password)
-      if (!strong) { this.error = 'Password needs 8+ chars with letters and numbers'; return }
+      await this.doSignUpWithFirebase({
+        name: this.name,
+        email: this.normalizeEmail(this.email),
+        password: this.password,
+        role: this.role,
+      });
+    },
 
-      const users = this.readUsers()
-      const emailN = this.normalizeEmail(this.email)
-      if (users.some(u => this.normalizeEmail(u.email) === emailN)) { this.error = 'Email is already registered'; return }
-
-      users.push({ name: this.name.trim(), email: emailN, password: this.password, role: this.role })
-      this.writeUsers(users)
-      this.info = 'Account created. Please sign in.'
-      this.tab = 'signin'
-      this.password = ''; this.confirmPassword = ''
-      this.$nextTick(() => document.getElementById('email')?.focus())
-    }
-  }
-}
+    async sendResetEmail() {
+      if (!this.email?.trim()) { this.error = "Enter your email first"; return; }
+      try {
+        await sendPasswordResetEmail(auth, this.normalizeEmail(this.email));
+        this.info = "Password reset email sent.";
+      } catch (e) {
+        this.error = e.message || "Could not send reset email.";
+      }
+    },
+    async signOutNow() { await signOut(auth); },
+    onSignInInput() { if (this.tab !== "signin") return; this.error = ""; },
+    onSignUpInput() { if (this.tab !== "signup") return; if (!this.error) return; },
+  },
+};
 </script>
+
 
 <style scoped>
 /* eye icon positioning */
@@ -359,7 +410,6 @@ export default {
   transform: translateY(-50%) scale(0.96);
 }
 
-/* small mobile padding */
 @media (max-width: 576px) {
   section {
     padding-left: 12px;
