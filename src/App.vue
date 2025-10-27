@@ -12,7 +12,7 @@
               Youth Mental Health and Wellbeing
             </span>
           </router-link>
-        </div>
+        </div>        
 
         <!-- Right side -->
         <div class="d-flex align-items-center gap-3">
@@ -201,45 +201,54 @@ import { doc, getDoc } from 'firebase/firestore'
 export default {
   name: 'App',
   components: { BackButton },
+
   data() {
     return {
-      // auth-driven UI
       isLoggedIn: false,
       currentUserName: '',
       role: '',
-
-      // modals
       showSupport: false,
       showCrisis: false,
       showAccessibility: false,
       showPrivacy: false,
-
       supportList: [
-        { name: 'Lifeline (24/7)', phone: '131114', hours: '24 hours' },
-        { name: 'Kids Helpline',  phone: '1800551800', hours: '24 hours' },
-        { name: 'Beyond Blue',    phone: '1300224636', hours: '24 hours' }
-      ]
+        { name: 'Lifeline (24/7)', phone: '131114',   hours: '24 hours' },
+        { name: 'Kids Helpline',   phone: '1800551800', hours: '24 hours' },
+        { name: 'Beyond Blue',     phone: '1300224636', hours: '24 hours' }
+      ],
+      _unsubAuth: null,
     }
   },
+
   computed: {
     showBackBtn() {
       const name = this.$route?.name || ''
       return name === 'Student' || name === 'Teacher'
     },
-    // show Login button only when not authenticated
     showLoginBtn() {
-      const routeName = this.$route?.name || "";
-      return !this.isLoggedIn && routeName !== "Login";
+      const routeName = this.$route?.name || ''
+      return !this.isLoggedIn && routeName !== 'Login'
     },
-
     userInitial() {
       const n = (this.currentUserName || '').trim()
       return n ? n.charAt(0).toUpperCase() : 'U'
     }
   },
-  created() {
-    // Listen once for Firebase auth state; update top-right user/role
-    onAuthStateChanged(auth, async (u) => {
+
+  async created() {
+    // 1) Listen for future changes
+    this._unsubAuth = onAuthStateChanged(auth, (u) => this.applyUser(u))
+
+    // 2) Also apply immediately if user already known (after redirect from login)
+    await this.applyUser(auth.currentUser)
+  },
+
+  beforeUnmount() {
+    if (this._unsubAuth) this._unsubAuth()
+  },
+
+  methods: {
+    async applyUser(u) {
       if (!u) {
         this.isLoggedIn = false
         this.currentUserName = ''
@@ -247,24 +256,27 @@ export default {
         return
       }
 
-      // base: name (or email) from Auth
-      const display = u.displayName || u.email || 'User'
-      let role = 'student' // default
+      // Prefer Firestore profile name; then Auth displayName; finally email
+      let nameFromProfile = ''
+      let roleFromProfile = 'student'
 
-      // try to read role from Firestore users/{uid}
       try {
-        const snap = await getDoc(doc(db, 'users', u.uid))
-        if (snap.exists() && snap.data()?.role) role = snap.data().role
+        const snap = await getDoc(doc(db, "users", u.uid));
+        if (snap.exists()) {
+          const p = snap.data()
+          nameFromProfile = (p?.name || '').trim()
+          roleFromProfile = p?.role || roleFromProfile
+        }
       } catch (e) {
-        console.warn('Could not fetch role:', e?.message || e)
+        console.warn('Profile read failed:', e?.message || e)
       }
 
+      const display = u.displayName || u.email || 'User'
       this.isLoggedIn = true
-      this.currentUserName = display
-      this.role = role
-    })
-  },
-  methods: {
+      this.currentUserName = nameFromProfile || display
+      this.role = roleFromProfile
+    },
+
     async logout() {
       try { await signOut(auth) } finally {
         this.isLoggedIn = false
@@ -276,6 +288,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 .avatar {

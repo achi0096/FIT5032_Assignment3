@@ -306,12 +306,14 @@ export default {
           await updateProfile(cred.user, { displayName: cleanName });
         }
 
+        
         // Save profile in Firestore 
         await setDoc(doc(db, "users", cred.user.uid), {
           uid: cred.user.uid,
           displayName: cleanName,
           email,               
-          role: role || "student",
+          // role: role || "student",
+          role: role,
           createdAt: serverTimestamp(),
         });                  
 
