@@ -40,7 +40,7 @@
 
 <script>
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { app } from "@/firebase/init"; // export your initialized app from init.js
+import { app } from "@/firebase/init"; 
 
 export default {
   name: "EmailForm",
@@ -66,7 +66,7 @@ export default {
       this.fileType = f.type || "application/octet-stream";
       const reader = new FileReader();
       reader.onload = () => {
-        // result is data URL: "data:...;base64,AAAA"
+       
         const base64 = String(reader.result).split("base64,")[1] || "";
         this.fileB64 = base64;
       };

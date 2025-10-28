@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import { auth } from "@/firebase/init";
 
 const to = ref("");
 const subject = ref("");
@@ -13,59 +12,60 @@ function onFile(e) {
   file.value = e.target.files?.[0] || null;
 }
 
-function fileToBase64(f) {
+function fileToBase64NoPrefix(f) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const s = String(reader.result || "");
-      // strip "data:...;base64," if present
-      const idx = s.indexOf("base64,");
-      resolve(idx >= 0 ? s.slice(idx + 7) : s);
+    const r = new FileReader();
+    r.onload = () => {
+      const s = String(r.result || "");
+      const i = s.indexOf("base64,");
+      resolve(i >= 0 ? s.slice(i + 7) : s);
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(f);
+    r.onerror = reject;
+    r.readAsDataURL(f);
   });
 }
 
 async function sendEmail() {
   result.value = "";
   sending.value = true;
+
   try {
-    const token = await auth.currentUser.getIdToken();
-
-    let attachment = undefined;
+    let attachmentBase64, attachmentName, attachmentMime;
     if (file.value) {
-      attachment = {
-        filename: file.value.name,
-        type: file.value.type || "application/octet-stream",
-        content: await fileToBase64(file.value),
-      };
+      attachmentBase64 = await fileToBase64NoPrefix(file.value);
+      attachmentName   = file.value.name;
+      attachmentMime   = file.value.type || "application/octet-stream";
     }
+   
+    const SENDMAIL_URL = import.meta.env.VITE_SENDMAIL_URL || "/api/send-email";
+    console.log("VITE_SENDMAIL_URL =", SENDMAIL_URL);
+    window.SENDMAIL_URL = SENDMAIL_URL; // so you can read it in DevTools
+    const url = SENDMAIL_URL;
 
-    // Replace with your deployed function URL
-    const url = import.meta.env.VITE_SENDMAIL_URL
-      || "https://australia-southeast1-<project-id>.cloudfunctions.net/sendMail";
 
-    const r = await fetch(url, {
+    const resp = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + token,
+
       },
       body: JSON.stringify({
         to: to.value,
         subject: subject.value,
         text: body.value,
         html: `<p>${body.value.replace(/\n/g, "<br/>")}</p>`,
-        attachment,
+        attachmentBase64,
+        attachmentName,
+        attachmentMime,
       }),
     });
 
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error || "Failed");
-    result.value = "Email sent ✔";
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data.error || resp.statusText);
+
+    result.value = "Email sent successfully.";
   } catch (e) {
-    result.value = "Error: " + (e.message || e);
+    result.value = "Error: " + (e?.message ?? String(e));
   } finally {
     sending.value = false;
   }
@@ -74,8 +74,9 @@ async function sendEmail() {
 
 <template>
   <section class="container" style="max-width:680px">
-    <h2 class="mb-3">Send Email (with attachment)</h2>
-    <div v-if="result" class="alert" :class="result.startsWith('Error') ? 'alert-danger':'alert-success'">
+    <h2 class="mb-3">Send Email</h2>
+
+    <div v-if="result" class="alert" :class="result.startsWith('Error') ? 'alert-danger' : 'alert-success'">
       {{ result }}
     </div>
 
@@ -102,7 +103,7 @@ async function sendEmail() {
       </div>
 
       <button class="btn btn-success" :disabled="sending">
-        {{ sending ? 'Sending…' : 'Send Email' }}
+        {{ sending ? "Sending…" : "Send Email" }}
       </button>
     </form>
   </section>

@@ -37,7 +37,6 @@ export const onRequestGet = ({ request, env }) =>
 export const onRequestPost = async ({ request, env }) => {
   const cors = buildCorsHeaders(request, env);
 
-  // Optional shared secret
   const key = request.headers.get('X-API-KEY');
   if (env.PRIVATE_API_KEY && key !== env.PRIVATE_API_KEY) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -72,7 +71,7 @@ export const onRequestPost = async ({ request, env }) => {
       ],
       attachments: attachmentBase64
         ? [{
-            content: attachmentBase64,              // base64 ONLY (no data: prefix)
+            content: attachmentBase64,              
             filename: attachmentName || 'file.bin',
             disposition: 'attachment',
             type: attachmentMime,

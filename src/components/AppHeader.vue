@@ -16,6 +16,15 @@
           Get Support Now
         </button>
 
+      <!-- Email button (shown only when parent sets showEmail=true) -->
+      <router-link
+        v-if="showEmail"
+        :to="{ name: 'Email' }"
+        class="btn btn-success btn-sm d-inline-flex align-items-center">
+        Email
+      </router-link>
+
+
         <!-- Logged OUT -->
         <router-link
           v-if="showLogin"
@@ -24,7 +33,7 @@
           Login
         </router-link>
 
-        <!-- Logged IN -->
+        <!-- Logged IN -->        
         <div v-else class="dropdown">
           <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
             <span class="badge bg-secondary rounded-circle me-1">{{ initials }}</span>
@@ -49,14 +58,14 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  showLogin: { type: Boolean, default: false }, // true = show "Login" button
+  showLogin: { type: Boolean, default: false },
   username:  { type: String,  default: 'User' },
-  role:      { type: String,  default: 'student' } // 'student' | 'teacher'
+  role:      { type: String,  default: 'student' },
+  showEmail: { type: Boolean, default: false }   // <-- NEW
 })
 defineEmits(['support', 'logout'])
 
 const initials  = computed(() => (props.username || 'U').trim().charAt(0).toUpperCase())
 const roleLabel = computed(() => (props.role === 'teacher' ? 'Teacher' : 'Student'))
 const roleRoute = computed(() => (props.role === 'teacher' ? { name: 'Teacher' } : { name: 'Student' }))
-
 </script>
