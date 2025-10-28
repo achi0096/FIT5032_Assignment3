@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-// DataTables v2 vanilla import (Bootstrap 5 styling bundle)
+// DataTables 
 import DataTable from 'datatables.net-bs5';
 
 const usersTableEl = ref(null);
@@ -47,29 +47,29 @@ onMounted(async () => {
   usersDT = new DataTable(usersTableEl.value, {
     data: users,
     columns: [
-      { title: 'ID', data: 'id' },
+      { title: 'ID', data: 'id', className: 'dt-head-left dt-body-left' },
       { title: 'Name', data: 'name' },
       { title: 'Email', data: 'email' },
       { title: 'Role', data: 'role' },
       { title: 'Status', data: 'status' },
-      { title: 'Created', data: 'created_at' },
+      { title: 'Created', data: 'created at' },
     ],
     paging: true,
     pageLength: 10,     // <= limit to 10 rows per page
     searching: true,    // global search box
     ordering: true,     // column sort
-    lengthChange: false // hide "show N rows" selector to enforce 10
+    lengthChange: false 
   });
 
   // RESOURCES TABLE
   resourcesDT = new DataTable(resourcesTableEl.value, {
     data: resources,
     columns: [
-      { title: 'ID', data: 'id' },
+      { title: 'ID', data: 'id', className: 'dt-head-left dt-body-left' },
       { title: 'Title', data: 'title' },
       { title: 'Category', data: 'category' },
-      { title: 'Rating', data: 'rating' },
-      { title: 'Updated', data: 'updated_at' },
+      { title: 'Rating', data: 'rating', className: 'dt-head-left dt-body-left' },
+      { title: 'Updated', data: 'updated at' },
     ],
     paging: true,
     pageLength: 10,
@@ -114,8 +114,7 @@ onBeforeUnmount(() => {
             <tr>
               <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th>
             </tr>
-          </thead>
-          <!-- tfoot added dynamically to support per-column search -->
+          </thead>         
         </table>
       </div>
     </div>
@@ -129,8 +128,7 @@ onBeforeUnmount(() => {
             <tr>
               <th>ID</th><th>Title</th><th>Category</th><th>Rating</th><th>Updated</th>
             </tr>
-          </thead>
-          <!-- tfoot added dynamically to support per-column search -->
+          </thead>        
         </table>
       </div>
     </div>

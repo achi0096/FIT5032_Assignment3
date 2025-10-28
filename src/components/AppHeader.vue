@@ -23,8 +23,7 @@
         class="btn btn-success btn-sm d-inline-flex align-items-center">
         Email
       </router-link>
-
-
+      
         <!-- Logged OUT -->
         <router-link
           v-if="showLogin"

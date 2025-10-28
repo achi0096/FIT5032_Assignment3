@@ -24,6 +24,13 @@
           Email
         </router-link>
 
+        <!-- Interactive Tables link -->
+        <router-link
+          :to="{ name: 'InteractiveTablesView' }"
+          class="btn btn-outline-secondary btn-sm">
+          Tables
+        </router-link>
+
         <!-- Login (only when logged out) -->
         <router-link
           v-if="showLoginBtn && !isLoginPage"
