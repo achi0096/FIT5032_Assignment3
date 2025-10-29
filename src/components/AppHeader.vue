@@ -62,6 +62,10 @@ const navButtons = computed(() => {
           Get Support Now
         </button>
 
+        <!-- Map  -->
+        <router-link to="/map" class="btn btn-outline-secondary btn-sm">Map</router-link>
+
+
         <!-- Render the required two buttons for the current page -->
         <router-link
           v-for="b in navButtons"

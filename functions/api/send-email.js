@@ -2,40 +2,61 @@
 
 function buildCorsHeaders(request, env) {
   const origin = request.headers.get('Origin');
-  const list = (env.ALLOWED_ORIGIN || '')
+  const reqAllowHeaders = request.headers.get('Access-Control-Request-Headers');
+  const allowList = (env.ALLOWED_ORIGIN || '')
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
+
+  // Default allow headers (plus anything the browser asked for)
+  const allowHeaders = reqAllowHeaders && reqAllowHeaders.length
+    ? reqAllowHeaders
+    : 'Content-Type, Authorization, X-API-KEY';
 
   // If no Origin (curl/postman), be permissive
   if (!origin) {
     return {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-KEY',
+      'Access-Control-Allow-Headers': allowHeaders,
+      'Access-Control-Max-Age': '600',
+      'Access-Control-Expose-Headers': 'Content-Type',
+      'Vary': 'Origin',
     };
   }
 
   // If Origin matches one in the allowlist, echo it back
-  const allowed = list.find(a => a === origin);
+  const allowed = allowList.find(a => a === origin);
+  
   return {
-    'Access-Control-Allow-Origin': allowed || 'null',
+    'Access-Control-Allow-Origin': allowed || '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-KEY',
+    'Access-Control-Allow-Headers': allowHeaders,
+    'Access-Control-Max-Age': '600',
     'Access-Control-Expose-Headers': 'Content-Type',
+    'Vary': 'Origin',
   };
 }
 
+// ✅ Preflight: MUST be 204 with CORS headers
 export const onRequestOptions = ({ request, env }) =>
-  new Response(null, { headers: buildCorsHeaders(request, env) });
+  new Response(null, { status: 204, headers: buildCorsHeaders(request, env) });
 
 export const onRequestGet = ({ request, env }) =>
   new Response(JSON.stringify({ ok: true, hint: 'POST to this endpoint to send email' }), {
+    status: 200,
     headers: { 'Content-Type': 'application/json', ...buildCorsHeaders(request, env) },
   });
 
 export const onRequestPost = async ({ request, env }) => {
   const cors = buildCorsHeaders(request, env);
+
+  // Optional: fail fast if critical envs are missing
+  if (!env.SENDGRID_API_KEY || !env.FROM_EMAIL) {
+    return new Response(JSON.stringify({ ok: false, error: 'Missing SENDGRID_API_KEY or FROM_EMAIL' }), {
+      status: 500, headers: { ...cors, 'Content-Type': 'application/json' },
+    });
+  }
 
   const key = request.headers.get('X-API-KEY');
   if (env.PRIVATE_API_KEY && key !== env.PRIVATE_API_KEY) {
@@ -71,7 +92,7 @@ export const onRequestPost = async ({ request, env }) => {
       ],
       attachments: attachmentBase64
         ? [{
-            content: attachmentBase64,              
+            content: attachmentBase64,
             filename: attachmentName || 'file.bin',
             disposition: 'attachment',
             type: attachmentMime,

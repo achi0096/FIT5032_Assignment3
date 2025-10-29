@@ -7,6 +7,7 @@ import StudentView from '@/views/StudentView.vue';
 import TeacherView from '@/views/TeacherView.vue';
 import EmailSendView from "@/views/EmailSendView.vue";
 import InteractiveTablesView from "@/views/InteractiveTablesView.vue";
+import MapView from "@/views/MapView.vue";
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -15,7 +16,9 @@ const routes = [
   { path: '/student',   name: 'Student',   component: StudentView, meta: { requiresAuth: true } },
   { path: '/teacher',   name: 'Teacher',   component: TeacherView, meta: { requiresAuth: true } },
   { path: "/email", name: "Email", component: EmailSendView },
-  { path: '/interactive-tables', name: 'InteractiveTablesView', component: InteractiveTablesView }
+  { path: '/interactive-tables', name: 'InteractiveTablesView', component: InteractiveTablesView },
+  { path: '/map', name: 'MapView', component: MapView }
+
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });
