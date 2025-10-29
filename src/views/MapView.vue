@@ -60,6 +60,13 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
+// 🔎 debug (remove later)
+if (!MAPBOX_TOKEN) console.error('VITE_MAPBOX_TOKEN is MISSING in this build');
+else console.log('VITE_MAPBOX_TOKEN present:', MAPBOX_TOKEN.slice(0, 8) + '…');
+
+// (optional for quick check in DevTools)
+window.__MAPBOX_TOKEN__ = MAPBOX_TOKEN;
+
 const mapEl = ref(null);
 let map;
 let startMarker, endMarker;
