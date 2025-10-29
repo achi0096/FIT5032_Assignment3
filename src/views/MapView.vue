@@ -60,13 +60,6 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-// 🔎 debug (remove later)
-if (!MAPBOX_TOKEN) console.error('VITE_MAPBOX_TOKEN is MISSING in this build');
-else console.log('VITE_MAPBOX_TOKEN present:', MAPBOX_TOKEN.slice(0, 8) + '…');
-
-// (optional for quick check in DevTools)
-window.__MAPBOX_TOKEN__ = MAPBOX_TOKEN;
-
 const mapEl = ref(null);
 let map;
 let startMarker, endMarker;
@@ -83,7 +76,7 @@ onMounted(() => {
   map = new mapboxgl.Map({
     container: mapEl.value,
     style: "mapbox://styles/mapbox/streets-v12",
-    center: [144.9631, -37.8136], 
+    center: [144.9631, -37.8136], // Melbourne CBD
     zoom: 11,
   });
 
@@ -199,7 +192,7 @@ function useMyLocation() {
 
 // ---------- MAIN: Get route ----------
 async function getRoute() {
-  try {   
+  try {
     if (!startLngLat.value && startQuery.value) {
       const s = await geocode(startQuery.value);
       if (s) setStart(s);
