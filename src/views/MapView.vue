@@ -2,40 +2,56 @@
   <div class="container py-3">
     <h3 class="mb-3">Find Places & Get Directions</h3>
 
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
-        <label class="form-label">Start</label>
-        <input
-          v-model="startQuery"
-          class="form-control"
-          placeholder="Search start…"
-          @keydown.enter.prevent="searchStart"
-        />
-        <small class="text-muted d-block">
-          or
-          <button class="btn btn-link p-0" @click="useMyLocation">
-            Use my location
-          </button>
-        </small>
-      </div>
+  <!-- main inputs and buttons -->
+  <div class="row g-3 align-items-end mb-1">
+    <!-- START -->
+    <div class="col-md-4">
+      <label class="form-label">Start</label>
+      <input
+        v-model="startQuery"
+        class="form-control"
+        placeholder="Search start…"
+        @keydown.enter.prevent="searchStart"/>
+    </div>
 
-      <div class="col-md-4">
-        <label class="form-label">Destination</label>
-        <input
-          v-model="endQuery"
-          class="form-control"
-          placeholder="Search destination…"
-          @keydown.enter.prevent="searchEnd"
-        />
-      </div>
+    <!-- DESTINATION -->
+    <div class="col-md-4">
+      <label class="form-label">Destination</label>
+      <input
+        v-model="endQuery"
+        class="form-control"
+        placeholder="Search destination…"
+        @keydown.enter.prevent="searchEnd"/>
+    </div>
 
-      <div class="col-md-4 d-flex align-items-end gap-2">
-        <button class="btn btn-primary" @click="getRoute">Get Directions</button>
-        <button class="btn btn-outline-secondary" @click="clearRoute">
+    <!-- BUTTONS -->
+    <div class="col-md-4">
+      <label class="form-label d-block invisible">Actions</label>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm px-3" style="height: 38px" @click="getRoute">
+          Get Directions
+        </button>
+        <button class="btn btn-outline-secondary btn-sm px-3" style="height: 38px" @click="clearRoute">
           Clear
         </button>
       </div>
+      </div>
+  </div>
+
+  <!-- helper text only under Start -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="form-text mt-0" style="font-size: 0.9rem;">
+        or
+        <a
+          href="#"
+          @click.prevent="useMyLocation"
+          style="text-decoration: underline; color: #0d6efd; cursor: pointer;">
+          Use current location
+        </a>
+      </div>
     </div>
+  </div>
 
     <div class="mb-3" v-if="tripText">
       <div class="alert alert-info">{{ tripText }}</div>
@@ -47,7 +63,7 @@
     ></div>
 
     <p class="text-muted mt-2">
-      Features: place search (autocomplete), route drawing, trip distance & ETA.
+      Features: Location autocomplete, route visualization and trip details such as distance and estimated travel time.
     </p>
   </div>
 </template>
