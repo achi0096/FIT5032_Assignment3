@@ -23,10 +23,28 @@ const routes = [
 
 const router = createRouter({ history: createWebHistory(), routes });
 
+const authReady = new Promise((resolve) => {
+  const unsub = onAuthStateChanged(auth, () => {
+    try { unsub && unsub() } catch {}
+    resolve()
+  })
+  setTimeout(resolve, 2000)   // safety net
+})
+
+router.beforeEach(async (to, from, next) => {
+  // Public routes render immediately
+  if (!to.meta?.requiresAuth) return next()
+
+  // 🔒 Protected routes only: wait for auth state
+  await authReady
+  if (auth.currentUser) next()
+  else next({ name: 'Login' })
+})
+
 // Optional: simple “auth ready” gate to avoid early redirects
-let authReady = new Promise(resolve => {
-  const off = auth.onAuthStateChanged(() => { off(); resolve(); });
-});
+// let authReady = new Promise(resolve => {
+//   const off = auth.onAuthStateChanged(() => { off(); resolve(); });
+// });
 
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return true;

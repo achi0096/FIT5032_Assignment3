@@ -17,8 +17,9 @@ window.SENDMAIL_URL = import.meta.env.VITE_SENDMAIL_URL || '/api/send-email'
 console.log('VITE_SENDMAIL_URL =', window.SENDMAIL_URL)
 
 // DEBUG: remove after confirming
-window.__VITE_MAPBOX_TOKEN__ = import.meta.env.VITE_MAPBOX_TOKEN;
-console.log('VITE_MAPBOX_TOKEN (prod)?', window.__VITE_MAPBOX_TOKEN__ ? window.__VITE_MAPBOX_TOKEN__.slice(0,8)+'…' : 'MISSING');
+window.__VITE_MAPBOX_TOKEN__ = import.meta.env.VITE_MAPBOX_TOKEN
+console.log('VITE_MAPBOX_TOKEN (prod check):',
+  window.__VITE_MAPBOX_TOKEN__ ? window.__VITE_MAPBOX_TOKEN__.slice(0,8)+'…' : 'MISSING')
 
 
 app.use(router)                                 
