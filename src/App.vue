@@ -40,7 +40,7 @@
             v-for="b in navButtons"
             :key="b.to"
             :to="b.to"
-            class="btn btn-outline-secondary btn-sm">
+            class="btn btn-primary btn-sm">
             {{ b.label }}
           </router-link>
 

@@ -8,8 +8,8 @@ import TeacherView from '@/views/TeacherView.vue';
 import EmailSendView from "@/views/EmailSendView.vue";
 import InteractiveTablesView from "@/views/InteractiveTablesView.vue";
 import MapView from "@/views/MapView.vue";
+import ExportDataView from "@/views/ExportDataView.vue";
 import { onAuthStateChanged } from "firebase/auth";
-
 
 
 const routes = [
@@ -20,7 +20,8 @@ const routes = [
   { path: '/teacher',   name: 'Teacher',   component: TeacherView, meta: { requiresAuth: true } },
   { path: "/email", name: "Email", component: EmailSendView },
   { path: '/interactive-tables', name: 'InteractiveTablesView', component: InteractiveTablesView },
-  { path: '/map', name: 'MapView', component: MapView }
+  { path: '/map', name: 'MapView', component: MapView },
+  { path: '/export', name: 'ExportData', component: ExportDataView }
 
 ];
 
