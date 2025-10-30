@@ -2,7 +2,7 @@
   <section class="mx-auto" style="max-width: 680px;">
     <!-- Title -->
     <div class="d-flex align-items-center gap-3 mb-4">
-      <img src="/logo.jpeg" alt="logo" width="72" height="72" class="rounded-circle" />
+      <img src="/logo.jpeg" alt="Youth Mental Health & Wellbeing logo" width="72" height="72" class="rounded-circle" />
       <div>
         <h1 class="h4 mb-1">Welcome to Youth Mental Health & Wellbeing</h1>
         <p class="text-muted mb-0">Sign in or create an account</p>
@@ -10,30 +10,26 @@
     </div>
 
     <!-- Tabs -->
-    <div class="btn-group mb-3" role="group">
+    <div class="btn-group mb-3" role="group" aria-label="Auth tabs">
       <button
+        type="button"
         class="btn"
         :class="tab === 'signin' ? 'btn-primary' : 'btn-outline-primary'"
         @mousedown.prevent="prepareTabSwitch('signin')"
-        @click="switchTab('signin')"
-      >
-        Sign In
-      </button>
+        @click="switchTab('signin')">Sign In</button>
 
       <button
+        type="button"
         class="btn"
         :class="tab === 'signup' ? 'btn-primary' : 'btn-outline-primary'"
         @mousedown.prevent="prepareTabSwitch('signup')"
-        @click="switchTab('signup')"
-      >
-        Sign Up
-      </button>
+        @click="switchTab('signup')">Sign Up</button>
     </div>
 
     <!-- Card -->
     <div class="card shadow-sm">
       <div class="card-body">
-        <p v-if="info" class="text-success small mb-2" role="status">{{ info }}</p>
+        <p v-if="info" class="text-success small mb-2" role="status" aria-live="polite">{{ info }}</p>
         <p v-if="error" class="text-danger small mb-2" role="alert">{{ error }}</p>
 
         <form @submit.prevent="submitForm" class="row g-3" novalidate>
@@ -49,8 +45,10 @@
               maxlength="80"
               @blur="validateName()"
               @input="touched.name = true; validateName(); onSignUpInput()"
+              :aria-invalid="!!errors.name ? 'true' : undefined"   
+              aria-describedby="name-err"
             />
-            <div v-if="(signupSubmitted || touched.name) && errors.name" class="text-danger small">
+            <div v-if="(signupSubmitted || touched.name) && errors.name" id="name-err" class="text-danger small" role="alert">
               {{ errors.name }}
             </div>
           </div>
@@ -59,19 +57,20 @@
           <div class="col-12">
             <label for="email" class="form-label">Email</label>
             <input
-              id="email"
-              v-model.trim="email"
-              type="email"
-              class="form-control"
-              maxlength="80"
-              @blur="validateEmail()"
-              @input="touched.email = true; validateEmail(); onSignUpInput(); onSignInInput()"
-            />
-            <!-- show email error ONLY on Sign Up -->
+                id="email"
+                v-model.trim="email"
+                type="email"
+                class="form-control"
+                maxlength="80"
+                autocomplete="email"                               
+                @blur="validateEmail()"
+                @input="touched.email = true; validateEmail(); onSignUpInput(); onSignInInput()"
+                :aria-invalid="(tab==='signup' && !!errors.email) ? 'true' : undefined" 
+                :aria-describedby="tab==='signup' ? 'email-err' : null"
+              />
             <div
               v-if="tab === 'signup' && (signupSubmitted || touched.email) && errors.email"
-              class="text-danger small"
-            >
+              id="email-err" class="text-danger small" role="alert">
               {{ errors.email }}
             </div>
           </div>
@@ -86,44 +85,37 @@
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 class="form-control with-eye"
-                :autocomplete="tab === 'signin' ? 'current-password' : 'new-password'"
+                :autocomplete="tab === 'signin' ? 'current-password' : 'new-password'"  
                 maxlength="80"
                 @blur="validatePassword()"
                 @input="touched.password = true; validatePassword(); onSignUpInput(); onSignInInput()"
+                :aria-invalid="(tab==='signup' && !!errors.password) ? 'true' : undefined"  
+                aria-describedby="pwd-hint pwd-err"
               />
               <!-- Eye icon toggle -->
               <span
                 class="eye-toggle"
                 @mousedown.prevent
                 @click="showPassword = !showPassword"
-                :title="showPassword ? 'Hide password' : 'Show password'"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"                
                 role="button"
                 tabindex="0"
               >
                 <!-- eye -->
-                <svg v-if="!showPassword" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1.5 12s3.8-6.5 10.5-6.5S22.5 12 22.5 12s-3.8 6.5-10.5 6.5S1.5 12 1.5 12Z"
-                    stroke="#6c757d"
-                    stroke-width="1.8"
-                  />
-                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8" />
+                <svg v-if="!showPassword" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M1.5 12s3.8-6.5 10.5-6.5S22.5 12 22.5 12s-3.8 6.5-10.5 6.5S1.5 12 1.5 12Z" stroke="#6c757d" stroke-width="1.8"/>
+                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8"/>
                 </svg>
                 <!-- eye-slash -->
-                <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1.5 12s3.8-6.5 10.5-6.5c2.2 0 4.1.7 5.8 1.7M22.5 12s-3.8 6.5-10.5 6.5c-2.2 0-4.1-.7-5.8-1.7"
-                    stroke="#6c757d"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                  />
-                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8" />
-                  <path d="M3 21L21 3" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round" />
+                <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M1.5 12s3.8-6.5 10.5-6.5c2.2 0 4.1.7 5.8 1.7M22.5 12s-3.8 6.5-10.5 6.5c-2.2 0-4.1-.7-5.8-1.7" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8"/>
+                  <path d="M3 21L21 3" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
               </span>
             </div>
 
-            <div v-if="tab === 'signup'" class="form-text">
+            <div v-if="tab === 'signup'" id="pwd-hint" class="form-text">
               Password must contain minimum 8 characters with alphabets and numbers.
             </div>
 
@@ -131,8 +123,7 @@
               <router-link to="/reset-password" class="small text-decoration-none">Forgot password?</router-link>
             </div>
 
-            <!-- field-level password error only on Sign Up -->
-            <div v-if="(signupSubmitted || touched.password) && errors.password" class="text-danger small">
+            <div v-if="(signupSubmitted || touched.password) && errors.password" id="pwd-err" class="text-danger small" role="alert">
               {{ errors.password }}
             </div>
           </div>
@@ -148,42 +139,34 @@
                 :type="showConfirm ? 'text' : 'password'"
                 class="form-control with-eye"
                 maxlength="80"
+                autocomplete="new-password"   
                 @blur="validateConfirm()"
                 @input="touched.confirm = true; validateConfirm(); onSignUpInput()"
+                :aria-invalid="!!errors.confirm ? 'true' : undefined" 
+                aria-describedby="cpw-err"
               />
-              <!-- Eye icon toggle -->
               <span
                 class="eye-toggle"
                 @mousedown.prevent
                 @click="showConfirm = !showConfirm"
                 :title="showConfirm ? 'Hide password' : 'Show password'"
                 role="button"
-                tabindex="0"
-              >
+                tabindex="0">
                 <!-- eye -->
-                <svg v-if="!showConfirm" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1.5 12s3.8-6.5 10.5-6.5S22.5 12 22.5 12s-3.8 6.5-10.5 6.5S1.5 12 1.5 12Z"
-                    stroke="#6c757d"
-                    stroke-width="1.8"
-                  />
-                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8" />
+                <svg v-if="!showConfirm" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M1.5 12s3.8-6.5 10.5-6.5S22.5 12 22.5 12s-3.8 6.5-10.5 6.5S1.5 12 1.5 12Z" stroke="#6c757d" stroke-width="1.8"/>
+                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8"/>
                 </svg>
                 <!-- eye-slash -->
-                <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M1.5 12s3.8-6.5 10.5-6.5c2.2 0 4.1.7 5.8 1.7M22.5 12s-3.8 6.5-10.5 6.5c-2.2 0-4.1-.7-5.8-1.7"
-                    stroke="#6c757d"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                  />
-                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8" />
-                  <path d="M3 21L21 3" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round" />
+                <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M1.5 12s3.8-6.5 10.5-6.5c2.2 0 4.1.7 5.8 1.7M22.5 12s-3.8 6.5-10.5 6.5c-2.2 0-4.1-.7-5.8-1.7" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="12" cy="12" r="3.5" stroke="#6c757d" stroke-width="1.8"/>
+                  <path d="M3 21L21 3" stroke="#6c757d" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
               </span>
             </div>
 
-            <div v-if="(signupSubmitted || touched.confirm) && errors.confirm" class="text-danger small">
+            <div v-if="(signupSubmitted || touched.confirm) && errors.confirm" id="cpw-err" class="text-danger small" role="alert">
               {{ errors.confirm }}
             </div>
           </div>
@@ -198,7 +181,7 @@
           </div>
 
           <!-- Buttons -->
-          <div v-if="tab === 'signin'" class="col-12 d-grid">
+          <div v-if="tab === 'signin' " class="col-12 d-grid">
             <button type="submit" class="btn btn-success">Sign In</button>
           </div>
           <div v-else class="col-12 d-flex gap-2 justify-content-between">
@@ -212,8 +195,7 @@
               <a
                 href="#"
                 @mousedown.prevent="prepareTabSwitch(tab === 'signin' ? 'signup' : 'signin')"
-                @click.prevent="switchTab(tab === 'signin' ? 'signup' : 'signin')"
-              >
+                @click.prevent="switchTab(tab === 'signin' ? 'signup' : 'signin')">
                 {{ tab === 'signin' ? 'Sign up' : 'Sign in' }}
               </a>
             </small>
@@ -436,28 +418,16 @@ export default {
 
       if (this.tab === "signin") {
         const emailN = this.normalizeEmail(this.email);
-        if (!emailN && !this.password) {
-          this.error = "Username and password must be entered";
-          return;
-        }
-        if (!emailN) {
-          this.error = "Username must be entered";
-          return;
-        }
-        if (!this.password) {
-          this.error = "Password must be entered";
-          return;
-        }
+        if (!emailN && !this.password) { this.error = "Username and password must be entered"; return; }
+        if (!emailN) { this.error = "Username must be entered"; return; }
+        if (!this.password) { this.error = "Password must be entered"; return; }
         await this.doSignInWithFirebase(emailN, this.password);
         return;
       }
 
       // --- Sign Up path ---
       this.signupSubmitted = true;
-      this.validateName();
-      this.validateEmail();
-      this.validatePassword();
-      this.validateConfirm();
+      this.validateName(); this.validateEmail(); this.validatePassword(); this.validateConfirm();
 
       const firstMissing = () => {
         if (!this.name || !this.name.trim()) return "Full name must be entered";
@@ -467,23 +437,11 @@ export default {
         return "";
       };
       const missing = firstMissing();
-      if (missing) {
-        this.error = missing;
-        return;
-      }
-      if (!this.email.includes("@")) {
-        this.error = "Please enter a valid email";
-        return;
-      }
-      if (this.password !== this.confirmPassword) {
-        this.error = "Passwords do not match";
-        return;
-      }
+      if (missing) { this.error = missing; return; }
+      if (!this.email.includes("@")) { this.error = "Please enter a valid email"; return; }
+      if (this.password !== this.confirmPassword) { this.error = "Passwords do not match"; return; }
       const strong = this.password.length >= 8 && /[A-Za-z]/.test(this.password) && /\d/.test(this.password);
-      if (!strong) {
-        this.error = "Password needs 8+ chars with letters and numbers";
-        return;
-      }
+      if (!strong) { this.error = "Password needs 8+ chars with letters and numbers"; return; }
 
       await this.doSignUpWithFirebase({
         name: this.name,
@@ -494,10 +452,7 @@ export default {
     },
 
     async sendResetEmail() {
-      if (!this.email?.trim()) {
-        this.error = "Enter your email first";
-        return;
-      }
+      if (!this.email?.trim()) { this.error = "Enter your email first"; return; }
       try {
         await sendPasswordResetEmail(auth, this.normalizeEmail(this.email));
         this.info = "Password reset email sent.";
@@ -511,50 +466,23 @@ export default {
       this.clearSession();
     },
 
-    onSignInInput() {
-      if (this.tab !== "signin") return;
-      this.error = "";
-    },
-    onSignUpInput() {
-      if (this.tab !== "signup") return;
-      if (!this.error) return;
-    },
+    onSignInInput() { if (this.tab !== "signin") return; this.error = ""; },
+    onSignUpInput() { if (this.tab !== "signup") return; if (!this.error) return; },
   },
 };
 </script>
 
 <style scoped>
 /* eye icon positioning */
-.pw-wrap {
-  position: relative;
-}
-
-.with-eye {
-  padding-right: 2.4rem;
-}
-
+.pw-wrap { position: relative; }
+.with-eye { padding-right: 2.4rem; }
 .eye-toggle {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
+  position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+  cursor: pointer; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; z-index: 2;
 }
-
-.eye-toggle:active {
-  transform: translateY(-50%) scale(0.96);
-}
+.eye-toggle:active { transform: translateY(-50%) scale(0.96); }
 
 @media (max-width: 576px) {
-  section {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
+  section { padding-left: 12px; padding-right: 12px; }
 }
 </style>

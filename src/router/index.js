@@ -8,6 +8,8 @@ import TeacherView from '@/views/TeacherView.vue';
 import EmailSendView from "@/views/EmailSendView.vue";
 import InteractiveTablesView from "@/views/InteractiveTablesView.vue";
 import MapView from "@/views/MapView.vue";
+import { onAuthStateChanged } from "firebase/auth";
+
 
 
 const routes = [
@@ -22,7 +24,7 @@ const routes = [
 
 ];
 
-const router = createRouter({ history: createWebHistory(), routes });
+const router = createRouter({ history: createWebHistory(import.meta.env.BASE_URL), routes });
 
 const authReady = new Promise((resolve) => {
   const unsub = onAuthStateChanged(auth, () => {
@@ -35,6 +37,12 @@ const authReady = new Promise((resolve) => {
 router.beforeEach(async (to, from, next) => {
   // Public routes render immediately
   if (!to.meta?.requiresAuth) return next()
+
+router.afterEach(() => {
+  requestAnimationFrame(() => {
+    document.getElementById('main')?.focus();
+  });
+});
 
   // 🔒 Protected routes only: wait for auth state
   await authReady

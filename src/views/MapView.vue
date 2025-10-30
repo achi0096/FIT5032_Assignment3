@@ -1,64 +1,91 @@
 <template>
   <div class="container py-3">
-    <h3 class="mb-3">Find Places & Get Directions</h3>
+    <h1 class="h4 mb-3">Find Places & Get Directions</h1>
 
-  <!-- main inputs and buttons -->
-  <div class="row g-3 align-items-end mb-1">
-    <!-- START -->
-    <div class="col-md-4">
-      <label class="form-label">Start</label>
-      <input
-        v-model="startQuery"
-        class="form-control"
-        placeholder="Search start…"
-        @keydown.enter.prevent="searchStart"/>
+    <!-- ROW 1: Start | Destination | Buttons (alignment preserved) -->
+    <div class="row g-3 align-items-end mb-1">
+      <!-- START -->
+      <div class="col-md-4">
+        <label class="form-label mb-1" for="start">Start</label>
+        <input
+          id="start"
+          v-model="startQuery"
+          class="form-control"
+          type="search"
+          autocomplete="off"
+          placeholder="Search start…"
+          @keydown.enter.prevent="searchStart"
+        />
+      </div>
+
+      <!-- DESTINATION -->
+      <div class="col-md-4">
+        <label class="form-label mb-1" for="dest">Destination</label>
+        <input
+          id="dest"
+          v-model="endQuery"
+          class="form-control"
+          type="search"
+          autocomplete="off"
+          placeholder="Search destination…"
+          @keydown.enter.prevent="searchEnd"
+        />
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="col-md-4">
+        <!-- keeps equal bottom alignment with inputs -->
+        <label class="form-label d-block invisible mb-1">Actions</label>
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm px-3"
+            style="height: 38px"
+            @click="getRoute"
+          >
+            Get Directions
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm px-3"
+            style="height: 38px"
+            @click="clearRoute"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- DESTINATION -->
-    <div class="col-md-4">
-      <label class="form-label">Destination</label>
-      <input
-        v-model="endQuery"
-        class="form-control"
-        placeholder="Search destination…"
-        @keydown.enter.prevent="searchEnd"/>
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="col-md-4">
-      <label class="form-label d-block invisible">Actions</label>
-      <div class="d-flex gap-2">
-        <button class="btn btn-primary btn-sm px-3" style="height: 38px" @click="getRoute">
-          Get Directions
-        </button>
-        <button class="btn btn-outline-secondary btn-sm px-3" style="height: 38px" @click="clearRoute">
-          Clear
-        </button>
-      </div>
-      </div>
-  </div>
-
-  <!-- helper text only under Start -->
-  <div class="row">
-    <div class="col-md-4">
-      <div class="form-text mt-0" style="font-size: 0.9rem;">
-        or
-        <a
-          href="#"
-          @click.prevent="useMyLocation"
-          style="text-decoration: underline; color: #0d6efd; cursor: pointer;">
-          Use current location
-        </a>
+    <!-- ROW 2: helper text ONLY under Start (doesn't affect row 1 alignment) -->
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-text mt-0" id="start-hint" style="font-size: 0.9rem;">
+          or
+          <button
+            type="button"
+            class="btn btn-link p-0 align-baseline"
+            @click="useMyLocation"
+            aria-describedby="start-hint"
+          >
+            Use current location
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- live trip text -->
     <div class="mb-3" v-if="tripText">
-      <div class="alert alert-info">{{ tripText }}</div>
+      <div class="alert alert-info" role="status" aria-live="polite">
+        {{ tripText }}
+      </div>
     </div>
 
+    <!-- map -->
     <div
       ref="mapEl"
+      role="region"
+      aria-label="Map showing Melbourne and route results"
       style="height: 520px; border-radius: 12px; overflow: hidden"
     ></div>
 
@@ -87,12 +114,12 @@ const startLngLat = ref(null);
 const endLngLat = ref(null);
 const tripText = ref("");
 
-// ---------- Initialize Map ----------
+// ----- init map -----
 onMounted(() => {
   map = new mapboxgl.Map({
     container: mapEl.value,
     style: "mapbox://styles/mapbox/streets-v12",
-    center: [144.9631, -37.8136], // Melbourne CBD
+    center: [144.9631, -37.8136],
     zoom: 11,
   });
 
@@ -106,11 +133,15 @@ onMounted(() => {
   });
   map.addControl(geocoder, "top-left");
 
+  // label the injected geocoder input
+  setTimeout(() => {
+    const geocoderEl = document.querySelector(".mapboxgl-ctrl-geocoder input");
+    if (geocoderEl) geocoderEl.setAttribute("aria-label", "Search the map");
+  }, 0);
+
   geocoder.on("result", (e) => {
     const [lng, lat] = e.result.center;
-    new mapboxgl.Marker({ color: "#6c5ce7" })
-      .setLngLat([lng, lat])
-      .addTo(map);
+    new mapboxgl.Marker({ color: "#6c5ce7" }).setLngLat([lng, lat]).addTo(map);
     map.flyTo({ center: [lng, lat], zoom: 13 });
   });
 
@@ -139,7 +170,7 @@ onBeforeUnmount(() => {
   if (map) map.remove();
 });
 
-// ---------- Utility functions ----------
+// ----- helpers -----
 function setStart(lngLat) {
   startLngLat.value = lngLat;
   if (startMarker) startMarker.remove();
@@ -206,10 +237,9 @@ function useMyLocation() {
   );
 }
 
-// ---------- MAIN: Get route ----------
+// ----- routing -----
 async function getRoute() {
   try {
-    // If coords not set (user didn't press Enter), geocode automatically
     if (!startLngLat.value && startQuery.value) {
       const s = await geocode(startQuery.value);
       if (s) setStart(s);
@@ -234,8 +264,7 @@ async function getRoute() {
 
     const res = await fetch(url);
     if (!res.ok) {
-      const msg = await res.text();
-      console.error("Directions API error:", msg);
+      console.error("Directions API error:", await res.text());
       return alert("Directions request failed.");
     }
 
@@ -247,12 +276,11 @@ async function getRoute() {
       type: "FeatureCollection",
       features: [{ type: "Feature", geometry: route.geometry }],
     };
-
     if (routeSourceReady && map.getSource("route")) {
       map.getSource("route").setData(geojson);
     }
 
-    // Fit map to route
+    // fit to route
     const coords = route.geometry.coordinates;
     const bounds = coords.reduce(
       (b, c) => b.extend(c),
@@ -260,7 +288,6 @@ async function getRoute() {
     );
     map.fitBounds(bounds, { padding: 60 });
 
-    // Display distance & time
     const km = (route.distance / 1000).toFixed(1);
     const mins = Math.round(route.duration / 60);
     tripText.value = `Trip: ${km} km • ~${mins} min (${profile})`;
@@ -270,14 +297,11 @@ async function getRoute() {
   }
 }
 
-// ---------- Clear map ----------
+// ----- clear -----
 function clearRoute() {
   tripText.value = "";
   if (routeSourceReady && map.getSource("route")) {
-    map.getSource("route").setData({
-      type: "FeatureCollection",
-      features: [],
-    });
+    map.getSource("route").setData({ type: "FeatureCollection", features: [] });
   }
   if (startMarker) startMarker.remove();
   if (endMarker) endMarker.remove();

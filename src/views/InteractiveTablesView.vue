@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-// DataTables 
 import DataTable from 'datatables.net-bs5';
 
 const usersTableEl = ref(null);
@@ -22,9 +21,14 @@ function addColumnSearchInputs(tableEl) {
   if (!tfoot) {
     const newTfoot = document.createElement('tfoot');
     const tr = document.createElement('tr');
-    headers.forEach(() => {
+    headers.forEach((h) => {
       const th = document.createElement('th');
-      th.innerHTML = '<input type="text" class="form-control form-control-sm" placeholder="Search..." />';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'form-control form-control-sm';
+      inp.placeholder = 'Search...';
+      inp.setAttribute('aria-label', `Search ${h.textContent?.trim() || 'column'}`); // a11y
+      th.appendChild(inp);
       tr.appendChild(th);
     });
     newTfoot.appendChild(tr);
@@ -55,10 +59,17 @@ onMounted(async () => {
       { title: 'Created', data: 'created at' },
     ],
     paging: true,
-    pageLength: 10,     // <= limit to 10 rows per page
-    searching: true,    // global search box
-    ordering: true,     // column sort
-    lengthChange: false 
+    pageLength: 10,
+    searching: true,
+    ordering: true,
+    lengthChange: false
+  });
+
+  // Announce page range politely
+  usersDT.on('draw', function () {
+    const info = usersDT.page.info();
+    const el = document.getElementById('users-status');
+    if (el) el.textContent = `Showing ${info.start + 1}–${info.end} of ${info.recordsDisplay} users`;
   });
 
   // RESOURCES TABLE
@@ -78,19 +89,20 @@ onMounted(async () => {
     lengthChange: false
   });
 
+  resourcesDT.on('draw', function () {
+    const info = resourcesDT.page.info();
+    const el = document.getElementById('resources-status');
+    if (el) el.textContent = `Showing ${info.start + 1}–${info.end} of ${info.recordsDisplay} resources`;
+  });
+
   // Hook up per-column filtering (both tables)
   [usersDT, resourcesDT].forEach((dt, idx) => {
     const tableEl = idx === 0 ? usersTableEl.value : resourcesTableEl.value;
     dt.columns().every(function () {
       const column = this;
-      // Find the input in the corresponding footer cell (same index)
       const input = tableEl.querySelectorAll('tfoot input')[column.index()];
-      input.addEventListener('keyup', () => {
-        column.search(input.value).draw();
-      });
-      input.addEventListener('change', () => {
-        column.search(input.value).draw();
-      });
+      input.addEventListener('keyup', () => column.search(input.value).draw());
+      input.addEventListener('change', () => column.search(input.value).draw());
     });
   });
 });
@@ -110,12 +122,16 @@ onBeforeUnmount(() => {
       <div class="card-body">
         <h2 class="h6 mb-3">Users</h2>
         <table ref="usersTableEl" class="table table-striped table-bordered w-100">
+          <caption class="text-start">Users</caption>
           <thead>
             <tr>
-              <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th>
+              <th scope="col">ID</th><th scope="col">Name</th><th scope="col">Email</th>
+              <th scope="col">Role</th><th scope="col">Status</th><th scope="col">Created</th>
             </tr>
-          </thead>         
+          </thead>
+          <!-- tfoot with inputs is added by script -->
         </table>
+        <div id="users-status" class="visually-hidden" aria-live="polite"></div>
       </div>
     </div>
 
@@ -124,20 +140,20 @@ onBeforeUnmount(() => {
       <div class="card-body">
         <h2 class="h6 mb-3">Resources</h2>
         <table ref="resourcesTableEl" class="table table-striped table-bordered w-100">
+          <caption class="text-start">Resources</caption>
           <thead>
             <tr>
-              <th>ID</th><th>Title</th><th>Category</th><th>Rating</th><th>Updated</th>
+              <th scope="col">ID</th><th scope="col">Title</th><th scope="col">Category</th>
+              <th scope="col">Rating</th><th scope="col">Updated</th>
             </tr>
-          </thead>        
+          </thead>
         </table>
+        <div id="resources-status" class="visually-hidden" aria-live="polite"></div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Keep the footer inputs compact */
-tfoot input {
-  width: 100%;
-}
+tfoot input { width: 100%; }
 </style>
