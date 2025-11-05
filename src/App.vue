@@ -77,6 +77,11 @@
                   >Teacher Area</router-link
                 >
               </li>
+              <li v-if="role === 'admin'">
+                <router-link class="dropdown-item" to="/admin"
+                  >Admin Area</router-link
+                >
+              </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a href="#" class="dropdown-item" @click.prevent="logout"
@@ -351,7 +356,7 @@ export default {
   computed: {
     showBackBtn() {
       const name = this.$route?.name || "";
-      return name === "Student" || name === "Teacher";
+      return name === "Student" || name === "Teacher" || name == "Admin";
     },
     userInitial() {
       const n = (this.currentUserName || "").trim();

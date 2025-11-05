@@ -39,7 +39,7 @@ function addColumnSearchInputs(tableEl) {
     headers.forEach((h) => {
       const th = document.createElement('th')
       const inp = document.createElement('input')
-      inp.type = 'text'
+      inp.type = 'text'      
       inp.className = 'form-control form-control-sm'
       inp.placeholder = 'Search...'
       inp.setAttribute('aria-label', `Search ${h.textContent?.trim() || 'column'}`)
@@ -256,4 +256,23 @@ tfoot input {
   color: #fff;
   border-color: #0d6efd;
 }
+
+::v-deep(.clear-btn) {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+::v-deep(.clear-btn:hover) {
+  color: #000;
+}
+
 </style>
