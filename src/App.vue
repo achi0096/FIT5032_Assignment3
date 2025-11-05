@@ -34,6 +34,25 @@
           <button class="btn btn-primary btn-sm" @click="showSupport = true">
             Get Support Now
           </button>
+          
+
+          <!-- Show Login button only when you're currently on the Map page -->
+          <RouterLink
+            v-if="$route.path === '/map'"
+            to="/login"
+            class="btn btn-primary btn-sm"
+            aria-label="Go to login page">
+            Login
+          </RouterLink>
+
+          <!-- Show Map button at login page -->
+          <RouterLink
+            v-if="$route.path === '/login'"
+            to="/map"
+            class="btn btn-primary btn-sm"
+            aria-label="Open map">
+            Map
+          </RouterLink>
 
           <!-- Dynamic top-right nav buttons -->
           <router-link
